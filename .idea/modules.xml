@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$USER_HOME$/Documents/FIM/Redispatch/RD 3.0 AP 2.1 Code/ap2_1/.idea/ap2_1.iml" filepath="$USER_HOME$/Documents/FIM/Redispatch/RD 3.0 AP 2.1 Code/ap2_1/.idea/ap2_1.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/ddit-code.iml" filepath="$PROJECT_DIR$/.idea/ddit-code.iml" />
     </modules>
   </component>

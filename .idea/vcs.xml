@@ -2,6 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$USER_HOME$/Documents/FIM/Redispatch/RD 3.0 AP 2.1 Code/ap2_1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ap2_1" vcs="Git" />
   </component>
 </project>
