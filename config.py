@@ -22,7 +22,7 @@ GRID_PRICE_FEEDIN = 0.07 # grid feedin price [€/kWh]
 # paths
 
 ROOT_PATH = Path(abspath(__file__)).parent.parent
-data_path = ROOT_PATH / 'data'
+data_path = ROOT_PATH / 'ddit-code' / 'data'
 
 PV_PATH = data_path / 'pv_generation.csv'
 DAY_AHEAD_PATH = data_path / 'day_ahead_prices_2022.csv'
