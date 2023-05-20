@@ -1,7 +1,5 @@
 import agent
-
-# TODO add main method
+import environment as env
 
 ag = agent.Agent()
-
 ag.run()
