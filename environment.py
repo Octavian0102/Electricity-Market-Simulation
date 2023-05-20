@@ -45,18 +45,7 @@ class Market():
         result["DA"] = self.prices_DA["Price"][self.time_index // 4]
         result["IA"] = self.prices_IA["Price"][self.time_index]
         result["IC"] = self.prices_IC["Price"][self.time_index]
-        """
-        if self.t == 0:
-            result['DA'] = self.relevant_DA_prices.iloc[12:36]
-            result['IA'] = self.relevant_IA_prices.iloc[48:144]
-        elif self.t == 16:
-            result['IA'] = self.relevant_IA_prices.iloc[144:240]
-        elif self.t - 16 % 96 == 0:
-            result['IA'] = self.relevant_IA_prices.iloc[self.t + 48:self.t + 144]
-        elif self.t % 96 == 0:
-            result['DA'] = self.relevant_DA_prices.iloc[int(self.t / 4) + 12: int(self.t / 4) + 36]
-        result['IC'] = self.relevant_IC_prices.iloc[self.t + 1]
-        """
+        
         self.time_index += 1
         return result
 
