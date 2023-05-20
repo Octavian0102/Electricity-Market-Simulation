@@ -1,3 +1,4 @@
+
 import pandas as pd
 import config
 
@@ -12,12 +13,13 @@ class Market():
         self.t = 0
 
         # read in price data
-        self.prices_DA = pd.read_csv(config.DAY_AHEAD_PATH, sep=";") # TODO handle hourly prices
-        self.prices_IA = pd.read_csv(config.INTRADAY_AUCTION_PATH, sep=";")
-        self.prices_IC = pd.read_csv(config.INTRADAY_CONTINUOUS_PATH, sep=";")
-        # TODO extract relevant prices based on config dates (datetime)
-        # TODO transform MWh to kWh
-
+        self.prices_DA = pd.read_csv(config.DAY_AHEAD_PATH, sep=";", index_col='Time') # TODO handle hourly prices
+        self.prices_IA = pd.read_csv(config.INTRADAY_AUCTION_PATH, sep=";", index_col='Time')
+        self.prices_IC = pd.read_csv(config.INTRADAY_CONTINUOUS_PATH, sep=";", index_col='Time')
+        # slice DataFrame to the relevant sequence from start to end from config and transforms to kWh
+        self.relevant_IA_prices = self.prices_IA.loc[config.T_START:]/1000
+        self.relevant_IC_prices = self.prices_IC.loc[config.T_START:]/1000
+        self.relevant_DA_prices = self.prices_DA.loc[config.T_START:]/1000
 
     def getMarketPrices(self) -> dict:
         """
@@ -25,14 +27,18 @@ class Market():
         The keys are the different markets
         and the values are the respective market prices
         """
-
         result = dict()
-        result["DA"] = self.prices_DA["Price"] # TODO select prices from the next day
-        result["IA"] = 0 # TODO
-        result["IC"] = 0 # TODO
-
+        if self.t == 0:
+            result['DA'] = self.relevant_DA_prices.iloc[12:36]
+            result['IA'] = self.relevant_IA_prices.iloc[48:144]
+        elif self.t == 16:
+            result['IA'] = self.relevant_IA_prices.iloc[144:240]
+        elif self.t - 16 % 96 == 0:
+            result['IA'] = self.relevant_IA_prices.iloc[self.t + 48:self.t + 144]
+        elif self.t % 96 == 0:
+            result['DA'] = self.relevant_DA_prices.iloc[(self.t / 4) + 12:(self.t / 4) + 36]
+        result['IC'] = self.relevant_IC_prices.iloc[self.t + 1]
         self.t += 1
-
         return result
 
     def take_action(self, action) -> None:
