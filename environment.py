@@ -1,6 +1,7 @@
 import pandas as pd
 import config
-import datetime
+
+import datetime as dt
 
 class Market():
     """
