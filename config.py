@@ -27,7 +27,7 @@ GRID_PRICE_FEEDIN = 0.07 # grid feedin price [€/kWh]
 LOAD_CONSTANT = 50 # constant base load for the household [kWh]
 
 BATTERY_CHARGE_MIN = 0 # minimum battery charge state [kW]
-BATTERY_CHARGE_MAX = 1000 # maximum battery charge state [kW]
+BATTERY_CHARGE_MAX = 100 # maximum battery charge state [kW]
 BATTERY_CHARGE_INIT = BATTERY_CHARGE_MIN # initial battery charge state [kW]
 # TODO add battery efficiency constants when needed
 

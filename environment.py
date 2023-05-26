@@ -29,6 +29,7 @@ class Market():
         self.prices_IC.reset_index(drop=True, inplace=True)
 
         # transform prices to [€/kWh]
+        # TODO do we need the for statement in here? Should also work with just /1000
         for i in range(len(self.prices_DA)):
             self.prices_DA.at[i, "Price"] = self.prices_DA["Price"][i] / 1000
             self.prices_IA.at[i, "Price"] = self.prices_IA["Price"][i] / 1000
@@ -41,6 +42,7 @@ class Market():
         The keys are the different markets
         and the values are the respective market prices
         """
+        #TODO Discuss whether this simplification can be justified to some extend
         result = dict()
         result["DA"] = self.prices_DA["Price"][self.time_index // 4]
         result["IA"] = self.prices_IA["Price"][self.time_index]
@@ -64,14 +66,16 @@ class Household():
     """
 
     def __init__(self):
-        self.t = 0
+        self.time_index = 0
 
         # read in load data; for the beginning, the load is constant
+        # TODO add real loadmodel (DANIEL)
         self.load = [config.LOAD_CONSTANT] * config.T
 
         self.battery_state = config.BATTERY_CHARGE_INIT
 
         # read in PV data
+        # TODO get actual PV Data (Daniel)
         self.pv = pd.read_csv(config.PV_PATH, sep=",")
         self.pv.rename(columns = {"date": "Time", "MW": "Amount"}, inplace = True)
         self.pv = self.pv.loc[self.pv["Time"] >= config.T_START]
@@ -86,8 +90,8 @@ class Household():
         :return: the PV generation data known to the agent at the current time
         """
 
-        result = self.pv["Amount"][self.t]
-        self.t += 1
+        result = self.pv["Amount"][self.time_index]
+        self.time_index += 1
 
         return result
     
@@ -96,7 +100,7 @@ class Household():
         :return: current base load
         """
 
-        return self.load[self.t]
+        return self.load[self.time_index]
     
     def getBattery(self) -> float:
         """
