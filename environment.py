@@ -1,6 +1,7 @@
 
 import pandas as pd
 import config
+import preprocessing
 
 import datetime as dt
 
@@ -67,17 +68,19 @@ class Household():
 
     def __init__(self):
         self.time_index = 0
+        self.load = preprocessing.electricity_demand
 
         # read in load data; for the beginning, the load is constant
-        # TODO add real loadmodel (DANIEL)
-        self.load = [config.LOAD_CONSTANT] * config.T
+        # self.load = [config.LOAD_CONSTANT] * config.T
+        self.load = preprocessing.electricity_demand.loc[self.load["Time"] >= config.T_START]
+        self.load.reset_index(drop=True, inplace=True)
 
         self.battery_state = config.BATTERY_CHARGE_INIT
 
         # read in PV data
         # TODO get actual PV Data (Daniel)
         self.pv = pd.read_csv(config.PV_PATH, sep=",")
-        self.pv.rename(columns = {"date": "Time", "MW": "Amount"}, inplace = True)
+        self.pv.rename(columns={"date": "Time", "MW": "Amount"}, inplace=True)
         self.pv = self.pv.loc[self.pv["Time"] >= config.T_START]
         self.pv.reset_index(drop=True, inplace=True)
 
@@ -99,8 +102,9 @@ class Household():
         """
         :return: current base load
         """
-
-        return self.load[self.time_index]
+        result = self.load["Sum [kWh]"][self.time_index]
+        self.time_index += 1
+        return result
     
     def getBattery(self) -> float:
         """
