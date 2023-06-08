@@ -38,10 +38,10 @@ class Agent():
         
         self.contracts = list() # a list of active contracts
 
-        self.price_dict = dict()
-        self.price_dict["DA"] = 0
-        self.price_dict["IA"] = 0
-        self.price_dict["IC"] = 0
+        self.price_dict = dict() # initialize market price estimates with start prices
+        self.price_dict["DA"] = self.market.prices_DA["Price"][0]
+        self.price_dict["IA"] = self.market.prices_IA["Price"][0]
+        self.price_dict["IC"] = self.market.prices_IC["Price"][0]
 
         # logging dataframes
         self.log_pd = pd.DataFrame(columns=["offer_DA", "offer_IA", "offer_IC", "grid_feedin", "battery_charge", "pv",
@@ -64,6 +64,9 @@ class Agent():
         violations = 0
 
         for index in range(config.T):
+
+            delivered = 0 # cumulated energy quantity to deliver to the market in this time slot
+
             # check if contracts need to be fulfilled at the current time
             i = 0
             while i < len(self.contracts):
@@ -71,7 +74,8 @@ class Agent():
 
                 if(delivery_time <= self.time): # if the contract is to be fulfilled now
                     gains[market] += price * quantity # obtain the money
-                    self.action_log.loc[len(self.action_log)] = [self.time, market, price, quantity]
+                    delivered += q
+                    self.action_log.loc[len(self.action_log)] = [self.time, market, price, quantity] # log the action
                     self.contracts.pop(i) # delete the fulfilled contract from the list of open contracts
                     i -= 1
                 i += 1
@@ -87,10 +91,8 @@ class Agent():
             self.greedy()
 
             # place the recommended contracts on the market
-            delivered = 0 # cumulated energy quantity to deliver to the market
             for c in self.offers:
                 (_, _, q, _) = c
-                delivered += q
                 self.contracts.append(c)
                 valid = self.market.place_offer(c) # place offer and observe its validity
                 if(not valid): violations += 1
@@ -111,7 +113,6 @@ class Agent():
                 violations += 1
 
             # battery state
-            battery = self.battery_forecast[self.index_f]
             (load, pv, battery) = self.getForecasts(0)
             if(battery < config.BATTERY_CHARGE_MIN):
                 print(f"{index}: {self.time}: battery minimum charge: {battery}")
@@ -141,8 +142,10 @@ class Agent():
             costs += self.grid_demand[self.index_f] * config.GRID_PRICE_RESIDENTIAL
             gains["grid"] += self.grid_supply[self.index_f] * config.GRID_PRICE_FEEDIN
 
-            self.log_pd.loc[len(self.log_pd)] = [gains["DA"], gains["IA"], gains["IC"], self.grid_supply * config.GRID_PRICE_FEEDIN,
+            self.log_pd.loc[len(self.log_pd)] = [gains["DA"], gains["IA"], gains["IC"], self.grid_supply[self.index_f] * config.GRID_PRICE_FEEDIN,
                                                  battery, pv, load, self.time]
+            
+            self.updateHousekeeping()
             self.time = self.time + config.T_DELTA
 
         print(f"Constraint violations: {violations}")
@@ -157,11 +160,11 @@ class Agent():
         # plan decision for the next time step (IC market)
         self.plan_decision(1) 
 
-        # if the gate closure time for the IA auction market is reached, plan decisions for the next day (IA and IC market)
+        # if the gate closure time for the intraday auction market is reached, plan decisions for the next day (IA and IC market)
         if(self.time.time() == config.INTRADAY_AUCTION_CLOSURE):
             for t in range(33, 33+96):
                 self.plan_decision(t)
-        # if the gate closure time for the IA auction market is reached, plan decisions for the next day (DA, IA and IC market)
+        # if the gate closure time for the day-ahead market is reached, plan decisions for the next day (DA, IA and IC market)
         if(self.time.time() == config.DAY_AHEAD_CLOSURE):
             for t in range(49, 49+96):
                 self.plan_decision(t)
@@ -174,6 +177,7 @@ class Agent():
         placement_time = self.time + config.T_DELTA * ahead_time
         (load, pv, battery) = self.getForecasts(ahead_time)
         prices = self.getMarketPrediction(ahead_time)
+        print(prices)
 
         # variables to be determined in this action
         charge = 0
@@ -220,12 +224,12 @@ class Agent():
         best_market = "IC"
         # check intraday auction market
         if(self.time.date() < placement_time.date() and
-           dt.datetime.strptime(config.INTRADAY_AUCTION_CLOSURE, "%H:%M:%S").time() <= self.time.time()):
+           self.time.time() <= dt.datetime.strptime(config.INTRADAY_AUCTION_CLOSURE, "%H:%M:%S").time()):
             if(prices["IA"] > prices[best_market]):
                 best_market = "IA"
         # check day-ahead market
         if(self.time.date() < placement_time.date() and
-           dt.datetime.strptime(config.DAY_AHEAD_CLOSURE, "%H:%M:%S").time() <= self.time.time()):
+           self.time.time() <= dt.datetime.strptime(config.DAY_AHEAD_CLOSURE, "%H:%M:%S").time()):
             if(prices["DA"] > prices[best_market]):
                 best_market = "DA"
         
@@ -237,11 +241,11 @@ class Agent():
             self.offers.append((best_market, placement_time, surplus + battery, best_price)) # construct the market offer
             print(f"Action: market offer at {best_market} for {best_price} €/kWh")
         else:
-            # if no, use the energy to charge the battery or feed it into the grid
+            # if no, use the energy to charge the battery or offer a fraction of it on the market if the battery is full
             if(battery + surplus < config.BATTERY_CHARGE_MAX):
                 charge = surplus # charge the battery with the energy surplus and place no market offers
                 print(f"Action: charge due to small price at {best_market} of {best_price} €/kWh")
-            else:
+            else: # TODO change this to offer on the market
                 charge = config.BATTERY_CHARGE_MAX - battery # fully charge the battery
                 grid_supply = surplus - charge # feed the remaining energy into the grid
                 print(f"Action: partial charge and grid supply due to small price at {best_market} of {best_price} €/kWh")
@@ -278,7 +282,7 @@ class Agent():
                 self.pv_forecast[(self.index_f + ahead_time) % self.length_forecast],
                 self.battery_forecast[(self.index_f + ahead_time) % self.length_forecast])
     
-    def updateForecasts(self) -> None:
+    def updateHousekeeping(self) -> None:
         """
         Updates the technical housekeeping variables for the load, pv and battery forecast
         """

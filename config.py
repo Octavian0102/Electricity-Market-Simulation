@@ -20,8 +20,8 @@ INTRADAY_AUCTION_CLOSURE = "16:00:00"
 
 MIN_OFFER_QUANTITY = 100 # minimum quantity to offer on a market [kWh]
 
-LAMBDA = 0.5
-VOLA = 0.25
+LAMBDA = 0.2
+VOLA = 0.1
 
 # grid constants
 GRID_PRICE_RESIDENTIAL = 0.3 # grid residential price [€/kWh]

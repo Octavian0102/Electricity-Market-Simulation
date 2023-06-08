@@ -47,9 +47,7 @@ class Market():
         result["IC"] = self.prices_IC["Price"][self.time_index]
         self.time_index += 1
         self.current_time = self.current_time + config.T_DELTA
-        print(result)
         return result
-
 
     def place_offer(self, offer) -> bool:
         """
@@ -86,7 +84,7 @@ class Market():
                 res = False
 
         if(market == "IC"):
-            if(del_time.date() <= compare_time.date()):
+            if(del_time.date() < compare_time.date()):
                 print("IC: wrong date")
                 res = False
             if(del_time.time() <= compare_time.time()):
