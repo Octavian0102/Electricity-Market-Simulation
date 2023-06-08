@@ -1,5 +1,7 @@
 import math
 
+import pandas as pd
+
 import environment as env
 import config
 
@@ -35,10 +37,17 @@ class Agent():
         self.offers = list()
         
         self.contracts = list() # a list of active contracts
+
         self.price_dict = dict()
         self.price_dict["DA"] = 0
         self.price_dict["IA"] = 0
         self.price_dict["IC"] = 0
+
+        # logging dataframes
+        self.log_pd = pd.DataFrame(columns=["offer_DA", "offer_IA", "offer_IC", "grid_feedin", "battery_charge", "pv",
+                                            "load", "Time"])
+        self.action_log = pd.DataFrame(columns=["Time", "Market", "Price", "Quantity"])
+
 
     def run(self) -> None:
         """
@@ -62,11 +71,11 @@ class Agent():
 
                 if(delivery_time <= self.time): # if the contract is to be fulfilled now
                     gains[market] += price * quantity # obtain the money
-
+                    self.action_log.loc[len(self.action_log)] = [self.time, market, price, quantity]
                     self.contracts.pop(i) # delete the fulfilled contract from the list of open contracts
                     i -= 1
                 i += 1
-            
+
             prices = self.market.getMarketPrices()
 
             # update running price average
@@ -132,6 +141,8 @@ class Agent():
             costs += self.grid_demand[self.index_f] * config.GRID_PRICE_RESIDENTIAL
             gains["grid"] += self.grid_supply[self.index_f] * config.GRID_PRICE_FEEDIN
 
+            self.log_pd.loc[len(self.log_pd)] = [gains["DA"], gains["IA"], gains["IC"], self.grid_supply * config.GRID_PRICE_FEEDIN,
+                                                 battery, pv, load, self.time]
             self.time = self.time + config.T_DELTA
 
         print(f"Constraint violations: {violations}")
