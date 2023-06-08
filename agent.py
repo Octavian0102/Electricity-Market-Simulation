@@ -42,7 +42,12 @@ class Agent():
         Runs the optimization over the given time for the given environment
         """
 
-        gains = 0
+        gains = dict()
+        gains["grid"] = 0
+        gains["DA"] = 0
+        gains["IA"] = 0
+        gains["IC"] = 0
+
         costs = 0
         violations = 0
 
@@ -50,10 +55,10 @@ class Agent():
             # check if contracts need to be fulfilled at the current time
             i = 0
             while i < len(self.contracts):
-                (_, delivery_time, quantity, price) = self.contracts[i]
+                (market, delivery_time, quantity, price) = self.contracts[i]
 
                 if(delivery_time <= self.time): # if the contract is to be fulfilled now
-                    gains += price * quantity # obtain the money
+                    gains[market] += price * quantity # obtain the money
 
                     self.contracts.pop(i) # delete the fulfilled contract from the list of open contracts
                     i -= 1
@@ -65,6 +70,7 @@ class Agent():
             battery = self.household.getBattery()
             prices = self.market.getMarketPrices()
 
+            # update running price average
             self.price_dict["DA"] = self.price_dict["DA"] * config.LAMBDA + prices["DA"] * (1 - config.LAMBDA)
             self.price_dict["IA"] = self.price_dict["IA"] * config.LAMBDA + prices["IA"] * (1 - config.LAMBDA)
             self.price_dict["IC"] = self.price_dict["IC"] * config.LAMBDA + prices["IC"] * (1 - config.LAMBDA)
@@ -78,7 +84,8 @@ class Agent():
                 (_, _, q, _) = c
                 delivered += q
                 self.contracts.append(c)
-                self.market.place_offer(c)
+                valid = self.market.place_offer(c) # place offer and observe its validity
+                if(not valid): violations += 1
             # update battery state
             self.household.updateBattery(self.charge, self.discharge)
 
@@ -123,7 +130,7 @@ class Agent():
             print(f"{balance} = {pv} + {self.discharge} - {self.charge} + {self.grid_demand} - {self.grid_supply} - {delivered} - {load}\n")
 
             costs += self.grid_demand * config.GRID_PRICE_RESIDENTIAL
-            gains += self.grid_supply * config.GRID_PRICE_FEEDIN
+            gains["grid"] += self.grid_supply * config.GRID_PRICE_FEEDIN
 
             self.time = self.time + config.T_DELTA
 
