@@ -46,27 +46,9 @@ class Market():
         result["DA"] = self.prices_DA["Price"][self.time_index // 4]
         result["IA"] = self.prices_IA["Price"][self.time_index]
         result["IC"] = self.prices_IC["Price"][self.time_index]
-        
         self.time_index += 1
         self.current_time = self.current_time + config.T_DELTA
-        return result
-
-
-    def getMarketprediction(self) -> dict:
-        result = dict()
-        if self.time_index >= 4:
-            result["DA"] = float(self.prices_DA["Price"][(self.time_index // 4)-1]) * config.LAMBDA + \
-                           float(self.prices_DA["Price"][self.time_index//4]) * (1-config.LAMBDA)
-            result["IA"] = float(self.prices_IA["Price"][(self.time_index - 1)]) * config.LAMBDA + \
-                           float(self.prices_IA["Price"][self.time_index]) * (1-config.LAMBDA)
-            result["IC"] = float(self.prices_IC["Price"][(self.time_index - 1)]) * config.LAMBDA + \
-                           float(self.prices_IC["Price"][self.time_index]) * (1 - config.LAMBDA)
-
-        else:
-            result["DA"] = self.prices_DA["Price"][self.time_index // 4]
-            result["IA"] = self.prices_IA["Price"][self.time_index]
-            result["IC"] = self.prices_IC["Price"][self.time_index]
-        self.time_index += 1
+        print(result)
         return result
 
 

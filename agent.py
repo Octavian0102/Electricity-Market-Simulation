@@ -1,3 +1,5 @@
+import math
+
 import environment as env
 import config
 
@@ -22,6 +24,10 @@ class Agent():
         """
         
         self.contracts = list() # a list of active contracts
+        self.price_dict = dict()
+        self.price_dict["DA"] = 0
+        self.price_dict["IA"] = 0
+        self.price_dict["IC"] = 0
 
         # variables to be determined by the agent in each action
         self.discharge = 0
@@ -57,8 +63,12 @@ class Agent():
             load = self.household.getLoad()
             pv = self.household.getPV()
             battery = self.household.getBattery()
-
             prices = self.market.getMarketPrices()
+
+            self.price_dict["DA"] = self.price_dict["DA"] * config.LAMBDA + prices["DA"] * (1 - config.LAMBDA)
+            self.price_dict["IA"] = self.price_dict["IA"] * config.LAMBDA + prices["IA"] * (1 - config.LAMBDA)
+            self.price_dict["IC"] = self.price_dict["IC"] * config.LAMBDA + prices["IC"] * (1 - config.LAMBDA)
+
             # determine the action to take using a greedy approach
             self.greedy(load, pv, battery, prices)
 
@@ -176,3 +186,10 @@ class Agent():
                 self.grid_supply = surplus - self.charge # feed the remaining energy into the grid
                 print(f"Action: partial charge and grid supply due to small price at {best_market} of {best_price} €/kWh")
             return
+
+    def getMarketPrediction(self, time_delta):
+        res = dict()
+        res["DA"] = self.price_dict["DA"] * (1 - math.sqrt(time_delta) * config.VOLA)
+        res["IA"] = self.price_dict["IA"] * (1 - math.sqrt(time_delta) * config.VOLA)
+        res["IC"] = self.price_dict["IC"] * (1 - math.sqrt(time_delta) * config.VOLA)
+        return res
