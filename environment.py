@@ -1,8 +1,6 @@
 
 import pandas as pd
 import config
-import preprocessing
-
 import datetime as dt
 
 class Market():
@@ -52,6 +50,25 @@ class Market():
         self.time_index += 1
         return result
 
+
+    def getMarketprediction(self) -> dict:
+        result = dict()
+        if self.time_index >= 4:
+            result["DA"] = float(self.prices_DA["Price"][(self.time_index // 4)-1]) * config.LAMBDA + \
+                           float(self.prices_DA["Price"][self.time_index//4]) * (1-config.LAMBDA)
+            result["IA"] = float(self.prices_IA["Price"][(self.time_index - 1)]) * config.LAMBDA + \
+                           float(self.prices_IA["Price"][self.time_index]) * (1-config.LAMBDA)
+            result["IC"] = float(self.prices_IC["Price"][(self.time_index - 1)]) * config.LAMBDA + \
+                           float(self.prices_IC["Price"][self.time_index]) * (1 - config.LAMBDA)
+
+        else:
+            result["DA"] = self.prices_DA["Price"][self.time_index // 4]
+            result["IA"] = self.prices_IA["Price"][self.time_index]
+            result["IC"] = self.prices_IC["Price"][self.time_index]
+        self.time_index += 1
+        return result
+
+
     def place_offer(self, offer) -> None:
         """
         Places an offer on the given market with the respective specifications.
@@ -68,11 +85,12 @@ class Household():
 
     def __init__(self):
         self.time_index = 0
-        self.load = preprocessing.electricity_demand
+        self.load = pd.read_csv(config.LOAD_RESIDENTIAL_PATH, sep=";")
+        self.load = self.load.dropna()
 
         # read in load data; for the beginning, the load is constant
         # self.load = [config.LOAD_CONSTANT] * config.T
-        self.load = preprocessing.electricity_demand.loc[self.load["Time"] >= config.T_START]
+        self.load = self.load.loc[self.load["Time"] >= config.T_START]
         self.load.reset_index(drop=True, inplace=True)
 
         self.battery_state = config.BATTERY_CHARGE_INIT
