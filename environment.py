@@ -28,7 +28,6 @@ class Market():
         self.prices_IC.reset_index(drop=True, inplace=True)
 
         # transform prices to [€/kWh]
-        # TODO do we need the for statement in here? Should also work with just /1000
         for i in range(len(self.prices_DA)):
             self.prices_DA.at[i, "Price"] = self.prices_DA["Price"][i] / 1000
             self.prices_IA.at[i, "Price"] = self.prices_IA["Price"][i] / 1000
@@ -41,7 +40,7 @@ class Market():
         The keys are the different markets
         and the values are the respective market prices
         """
-        #TODO Discuss whether this simplification can be justified to some extend
+        
         result = dict()
         result["DA"] = self.prices_DA["Price"][self.time_index // 4]
         result["IA"] = self.prices_IA["Price"][self.time_index]
@@ -115,7 +114,6 @@ class Household():
         self.battery_state = config.BATTERY_CHARGE_INIT
 
         # read in PV data
-        # TODO get actual PV Data (Daniel)
         self.pv = pd.read_csv(config.PV_PATH, sep=",")
         self.pv.rename(columns={"date": "Time", "MW": "Amount"}, inplace=True)
         self.pv = self.pv.loc[self.pv["Time"] >= config.T_START]
@@ -139,22 +137,7 @@ class Household():
         """
         :return: current base load
         """
+        
         result = self.load["Sum [kWh]"][self.time_index]
         self.time_index += 1
         return result
-    
-    def getBattery(self) -> float:
-        """
-        :return: current battery state
-        """
-
-        return self.battery_state
-    
-    def updateBattery(self, charge, discharge) -> None:
-        """
-        Update the state of the battery
-        :param charge: battery charge amount
-        :param discharge: battery discharge amount
-        """
-
-        self.battery_state += charge - discharge
