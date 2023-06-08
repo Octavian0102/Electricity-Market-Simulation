@@ -10,7 +10,7 @@ class Market():
 
     def __init__(self):
         self.time_index = 0
-        self.current_time = config.T_START
+        self.current_time = dt.datetime.strptime(config.T_START, "%Y-%m-%d %H:%M:%S")
 
         # read in price data
         self.prices_DA = pd.read_csv(config.DAY_AHEAD_PATH, sep=";")
@@ -48,6 +48,7 @@ class Market():
         result["IC"] = self.prices_IC["Price"][self.time_index]
         
         self.time_index += 1
+        self.current_time = self.current_time + config.T_DELTA
         return result
 
 
@@ -69,13 +70,49 @@ class Market():
         return result
 
 
-    def place_offer(self, offer) -> None:
+    def place_offer(self, offer) -> bool:
         """
         Places an offer on the given market with the respective specifications.
         These include the market (DA, ...), the delivery time, the quantity and the offer price
         :param offer: the offer to be placed
         """
-        print(f"Offer placed: {offer}")
+
+        res = True
+        market, del_time, quantity, _ = offer
+        compare_time = self.current_time - config.T_DELTA
+
+        print(f"Placing offer at {market} for {del_time} of {quantity}, current time {compare_time}")
+
+        if(quantity < config.MIN_OFFER_QUANTITY):
+            print("Minimum offer quantitiy not satisfied")
+            res = False
+        
+        # check gate closure time
+        if(market == "DA"):
+            if(del_time.date() <= compare_time.date()):
+                print("DA: wrong date")
+                res = False
+            if(dt.datetime.strptime(config.DAY_AHEAD_CLOSURE, "%H:%M:%S").time() <= compare_time.time()):
+                print("DA: wrong time")
+                res = False
+
+        if(market == "IA"):
+            if(del_time.date() <= compare_time.date()):
+                print("IA: wrong date")
+                res = False
+            if(dt.datetime.strptime(config.INTRADAY_AUCTION_CLOSURE, "%H:%M:%S").time() <= compare_time.time()):
+                print("IA: wrong time")
+                res = False
+
+        if(market == "IC"):
+            if(del_time.date() <= compare_time.date()):
+                print("IC: wrong date")
+                res = False
+            if(del_time.time() <= compare_time.time()):
+                print("IC: wrong time")
+                res = False
+
+        return res
 
 
 class Household():

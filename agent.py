@@ -58,8 +58,7 @@ class Agent():
             pv = self.household.getPV()
             battery = self.household.getBattery()
 
-            # prices = self.market.getMarketPrices()
-            prices = self.market.getMarketprediction()
+            prices = self.market.getMarketPrices()
             # determine the action to take using a greedy approach
             self.greedy(load, pv, battery, prices)
 
