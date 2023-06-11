@@ -58,9 +58,9 @@ class Market():
 
         res = True
         market, del_time, quantity, _ = offer
-        compare_time = self.current_time - config.T_DELTA
+        compare_time = self.current_time - config.T_DELTA # to correct for the prices that have already been observed in the current time period
 
-        print(f"Placing offer at {market} for {del_time} of {quantity}, current time {compare_time}")
+        #print(f"Placing offer at {market} for {del_time} of {quantity}, current time {compare_time}")
 
         if(quantity < config.MIN_OFFER_QUANTITY):
             print("Minimum offer quantitiy not satisfied")
@@ -68,26 +68,23 @@ class Market():
         
         # check gate closure time
         if(market == "DA"):
-            if(del_time.date() <= compare_time.date()):
-                print("DA: wrong date")
-                res = False
-            if(dt.datetime.strptime(config.DAY_AHEAD_CLOSURE, "%H:%M:%S").time() <= compare_time.time()):
+            closure_config = dt.datetime.strptime(config.DAY_AHEAD_CLOSURE, "%H:%M:%S").time()
+            closure_time = del_time - dt.timedelta(days = 1)
+            closure_time = closure_time.replace(hour = closure_config.hour, minute = closure_config.minute, second = closure_config.second)
+            if(closure_time < compare_time):
                 print("DA: wrong time")
                 res = False
 
         if(market == "IA"):
-            if(del_time.date() <= compare_time.date()):
-                print("IA: wrong date")
-                res = False
-            if(dt.datetime.strptime(config.INTRADAY_AUCTION_CLOSURE, "%H:%M:%S").time() <= compare_time.time()):
+            closure_config = dt.datetime.strptime(config.INTRADAY_AUCTION_CLOSURE, "%H:%M:%S").time()
+            closure_time = del_time - dt.timedelta(days = 1)
+            closure_time = closure_time.replace(hour = closure_config.hour, minute = closure_config.minute, second = closure_config.second)
+            if(closure_time < compare_time):
                 print("IA: wrong time")
                 res = False
 
         if(market == "IC"):
-            if(del_time.date() < compare_time.date()):
-                print("IC: wrong date")
-                res = False
-            if(del_time.time() <= compare_time.time()):
+            if(del_time <= compare_time):
                 print("IC: wrong time")
                 res = False
 
