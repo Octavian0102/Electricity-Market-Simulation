@@ -37,9 +37,9 @@ class Agent():
         self.contracts = list() # a list of active contracts
 
         self.price_dict = dict() # initialize market price estimates with start prices
-        self.price_dict["DA"] = self.market.prices_DA["Price"][0]
-        self.price_dict["IA"] = self.market.prices_IA["Price"][0]
-        self.price_dict["IC"] = self.market.prices_IC["Price"][0]
+        self.price_dict["DA"] = [0] * 96 #self.market.prices_DA["Price"][0]
+        self.price_dict["IA"] = [0] * 96 #self.market.prices_IA["Price"][0]
+        self.price_dict["IC"] = [0] * 96 #self.market.prices_IC["Price"][0]
 
         # logging dataframes
         self.log_pd = pd.DataFrame(columns=["offer_DA", "offer_IA", "offer_IC", "grid_feedin", "battery_charge", "pv",
@@ -67,9 +67,9 @@ class Agent():
         # here, no market offer is possible
         (load, pv, battery, _, _, _, _) = self.getForecasts(0)
         if(pv - load > 0): # if there is an energy surplus, use is to charge the battery or feed it into the grid
-            if(battery + pv - load <= config.BATTERY_CHARGE_MAX): self.updateForecasts(0, pv - load, 0, 0, 0)
-            else: self.updateForecasts(0, 0, 0, 0, pv - load)
-        else: self.updateForecasts(0, 0, 0, load - pv, 0) # satisfy a deficit from the grid
+            if(battery + pv - load <= config.BATTERY_CHARGE_MAX): self.updateForecasts(0, pv - load, 0, 0, 0, 0)
+            else: self.updateForecasts(0, 0, 0, 0, pv - load, 0)
+        else: self.updateForecasts(0, 0, 0, load - pv, 0, 0) # satisfy a deficit from the grid
 
         for index in range(config.T):
 
@@ -91,9 +91,9 @@ class Agent():
                 i += 1
 
             # update running price average
-            self.price_dict["DA"] = self.price_dict["DA"] * config.LAMBDA + prices["DA"] * (1 - config.LAMBDA)
-            self.price_dict["IA"] = self.price_dict["IA"] * config.LAMBDA + prices["IA"] * (1 - config.LAMBDA)
-            self.price_dict["IC"] = self.price_dict["IC"] * config.LAMBDA + prices["IC"] * (1 - config.LAMBDA)
+            self.price_dict["DA"][(index + 48) % 96] = self.price_dict["DA"][(index + 48) % 96] * config.LAMBDA + prices["DA"] * (1 - config.LAMBDA)
+            self.price_dict["IA"][(index + 48) % 96] = self.price_dict["IA"][(index + 48) % 96] * config.LAMBDA + prices["IA"] * (1 - config.LAMBDA)
+            self.price_dict["IC"][(index + 48) % 96] = self.price_dict["IC"][(index + 48) % 96] * config.LAMBDA + prices["IC"] * (1 - config.LAMBDA)
 
             # determine the action to take using a greedy approach
             self.greedy()
@@ -133,7 +133,7 @@ class Agent():
             # load balancing
             balance = pv + self.discharge[self.index_f] - self.charge[self.index_f] + \
                 self.grid_demand[self.index_f] - self.grid_supply[self.index_f] - delivered - load
-            if(not isclose(balance, 0, abs_tol=0.000001)):
+            if(not isclose(balance, 0, abs_tol = 0.000001)):
                 print(f"\t{index}: {self.time}: load balance: {balance}")
                 self.violations += 1
 
@@ -228,6 +228,7 @@ class Agent():
                 if(CURRENT_T in ERRORS): print(f"Consider prior contract of {q} at {t}")
 
         if(CURRENT_T in ERRORS): print(f"Surplus: {surplus}")
+
         # first, satisfy own demand when the base load is higher than the pv generation and the demand from already made contracts
         if(surplus < 0):
             # use the battery if possible
@@ -239,22 +240,22 @@ class Agent():
                 grid_demand = - (battery + surplus) # fulfill the remaining demand from the grid
                 if(CURRENT_T in ERRORS): print("Action: full discharge with grid demand\n")
 
-            self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply)
+            self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, 0)
             return # in this case, no offers are placed
 
         # from here on, it is assumed that there is a surplus, so one now wants to make optimal use of this additional energy
         # first, check whether the minimum offer quantitiy for the energy market is satisfied
-        if(surplus + battery < config.MIN_OFFER_QUANTITY or min_surplus < config.MIN_OFFER_QUANTITY):
+        if(surplus + battery < config.MIN_OFFER_QUANTITY or surplus + min_surplus < config.MIN_OFFER_QUANTITY):
             if(battery + surplus < config.BATTERY_CHARGE_MAX):
                 charge = surplus # charge the battery with the energy surplus and place no market offers
                 if(CURRENT_T in ERRORS): print("Action: charge due to insufficient quantity")
             else:
                 charge = config.BATTERY_CHARGE_MAX - battery # fully charge the battery
                 grid_supply = surplus - charge # feed the remaining energy into the grid
-                if(CURRENT_T in ERRORS): print(f"Action: partial charge and grid supply of {grid_supply} due to insufficient quantity")
+                if(CURRENT_T in ERRORS): print(f"Action: partial charge and grid supply of {grid_supply} due to insufficient quantity, charge {charge}, discharge {discharge}")
             
             if(ahead_time == 1):
-                self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply)
+                self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, 0)
                 if(CURRENT_T in ERRORS): print("Action executed")
             if(CURRENT_T in ERRORS): print()
             return
@@ -264,40 +265,43 @@ class Agent():
             # if so, use the energy to charge the battery or offer a fraction of it on the market if the battery is full
             if(battery + surplus < config.BATTERY_CHARGE_MAX): # charge the battery if possible
                 charge = surplus # charge the battery with the energy surplus and place no market offers
-                if(ahead_time == 1): self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply)
+                if(ahead_time == 1): self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, 0)
                 if(CURRENT_T in ERRORS): print(f"Action: charge due to small price at {best_market} of {best_price} €/kWh\n")
                 return
             
             if(best_price < config.GRID_PRICE_FEEDIN):
                 grid_supply = surplus
-                if(ahead_time == 1): self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply)
+                if(ahead_time == 1): self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, 0)
                 if(CURRENT_T in ERRORS): print(f"Action: grid supply of {grid_supply} kWh due to small price\n")
                 return
 
             # offer the minimum amount of energy on the market otherwise
             discharge = max(config.MIN_OFFER_QUANTITY - surplus, 0) # discharge the battery to satisfy the minimum offer quantity
             self.placeOffer(best_market, placement_time, surplus + discharge, best_price)
-            self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply)
+            self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, surplus + discharge)
             if(CURRENT_T in ERRORS): print(f"Action: market offer at {best_market} of {surplus + discharge} for {best_price} €/kWh based on full battery\n")
             return
 
-        # if none of the above restrictions failed, place a full offer on the market
-        discharge = battery # if yes, fully discharge the battery to offer this energy on the market
-        self.placeOffer(best_market, placement_time, surplus + battery, best_price) # construct the market offer
-        self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply)
+        # if none of the above restrictions failed, place a full offer on the market # TODO check for min_surplus
+        discharge = min(battery, min_surplus) # if yes, discharge the battery as much as possible to offer this energy on the market
+        self.placeOffer(best_market, placement_time, surplus + discharge, best_price) # construct the market offer
+        self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, surplus + discharge)
         if(CURRENT_T in ERRORS): print(f"Action: market offer at {best_market} of {surplus + battery} for {best_price} €/kWh based on high price\n")
 
-    def getMarketPrediction(self, ahead_time) -> dict():
+    def getMarketPrediction(self, ahead_time) -> dict(): # TODO adapt this to deliver time-sensitive market price predictions
         """
         Gives a price forecast for the different markets based on past market prices and the forecast time
         :param ahead_time: the forecast time
         :return: a dictionary with the markets as keys and the price forecasts as values
         """
 
+        index = ((dt.timedelta(hours = self.time.hour, minutes = self.time.minute) // config.T_DELTA) + ahead_time) % 96
+
         res = dict()
-        res["DA"] = self.price_dict["DA"] * (1 - math.sqrt(ahead_time) * config.VOLA_DA)
-        res["IA"] = self.price_dict["IA"] * (1 - math.sqrt(ahead_time) * config.VOLA_IA)
-        res["IC"] = self.price_dict["IC"] * (1 - math.sqrt(ahead_time) * config.VOLA_IC)
+        res["DA"] = self.price_dict["DA"][index] * (1 - math.sqrt(ahead_time) * config.VOLA_DA)
+        res["IA"] = self.price_dict["IA"][index] * (1 - math.sqrt(ahead_time) * config.VOLA_IA)
+        res["IC"] = self.price_dict["IC"][index] * (1 - math.sqrt(ahead_time) * config.VOLA_IC)
+        #print(f"Index {index}, for {self.time}, ahead_time {ahead_time}, return {res}")
         return res
 
     def getForecasts(self, ahead_time) -> tuple():
@@ -368,7 +372,7 @@ class Agent():
 
         self.valid_f -= 1
 
-    def updateForecasts(self, ahead_time, charge, discharge, grid_demand, grid_supply) -> None:
+    def updateForecasts(self, ahead_time, charge, discharge, grid_demand, grid_supply, delivered) -> None:
         """
         Updates the battery state and grid forecasts, given a new charge/discharge or grid demand/supply occurring at ahead_time
         :param ahead_time: the time at which the new charge/dischrage or grid demand/supply occurs
@@ -376,8 +380,9 @@ class Agent():
         :param discharge: discharging value
         :param grid_demand: grid demand
         :param grid_supply: grid supply
+        :param delivered: amount of energy delivered to the market
         """
-        
+
         self.grid_demand[(self.index_f + ahead_time) % self.length_forecast] += grid_demand
         self.grid_supply[(self.index_f + ahead_time) % self.length_forecast] += grid_supply
 
@@ -387,7 +392,14 @@ class Agent():
         for i in range(ahead_time, self.valid_f):
             index = (self.index_f + i) % self.length_forecast
             self.battery_forecast[index] += charge - discharge
-            self.surplus_agg[index] += discharge - charge + grid_demand - grid_supply
+            self.surplus_agg[index] += discharge - charge + grid_demand - grid_supply - delivered
+
+            # rebalance the battery with the aggregated surplus if the forecasted charge drops below zero
+            if(self.battery_forecast[index] < 0): # this rebalancing assumes that the surplus is large enough to act as a sufficient battery recharge
+                if(self.surplus_agg[index] < - self.battery_forecast[index]):
+                    print("ERROR: insufficient surplus, undefined behavior may be imminent")
+                self.surplus_agg[index] += self.battery_forecast[index]
+                self.battery_forecast[index] = 0
 
     def placeOffer(self, market, del_time, quantity, bid_price) -> None:
         """

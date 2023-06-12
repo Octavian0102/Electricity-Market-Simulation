@@ -6,7 +6,7 @@ import datetime as dt
 
 # simulation time
 T_START = "2022-07-01 12:00:00" # start time
-T_END = "2022-07-03 12:00:00" # end time
+T_END = "2022-07-04 12:00:00" # end time
 
 # number of quarter hours between start and end time
 T = int(((dt.datetime.strptime(T_END, "%Y-%m-%d %H:%M:%S") -
@@ -20,10 +20,10 @@ INTRADAY_AUCTION_CLOSURE = "16:00:00"
 
 MIN_OFFER_QUANTITY = 100 # minimum quantity to offer on a market [kWh]
 
-LAMBDA = 0 # in [0,1], LAMBDA = 0 assumes prices are martingales
-VOLA_DA = 0.05
-VOLA_IA = 0.2
-VOLA_IC = 0.4
+LAMBDA = 0 # non-negative, LAMBDA = 0 leads to prices not being averaged over time
+VOLA_DA = 0
+VOLA_IA = 0
+VOLA_IC = 0
 
 # grid constants
 GRID_PRICE_RESIDENTIAL = 0.3 # grid residential price [€/kWh]
