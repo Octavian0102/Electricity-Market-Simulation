@@ -6,8 +6,11 @@ import matplotlib.pyplot as plt
 ag = agent.Agent()
 ag.run()
 
+print(f"Total constraint violations: {ag.violations}")
+
 print(ag.action_log)
 print(ag.log_pd)
+
 #post.post_bar(ag.log_pd)
 #post.line_chart(ag.log_pd)
 
