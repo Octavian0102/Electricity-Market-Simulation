@@ -1,6 +1,6 @@
+import config
 
 import pandas as pd
-import config
 import datetime as dt
 
 class Market():
@@ -8,7 +8,7 @@ class Market():
     Contains the market model, including market prices at different times, and handles offers placed by the agent
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.time_index = 0
         self.current_time = dt.datetime.strptime(config.T_START, "%Y-%m-%d %H:%M:%S")
 
@@ -32,7 +32,6 @@ class Market():
             self.prices_DA.at[i, "Price"] = self.prices_DA["Price"][i] / 1000
             self.prices_IA.at[i, "Price"] = self.prices_IA["Price"][i] / 1000
             self.prices_IC.at[i, "Price"] = self.prices_IC["Price"][i] / 1000
-
 
     def getMarketPrices(self) -> dict:
         """
@@ -96,7 +95,7 @@ class Household():
     Models the state of the household of the agent, including the battery and the pv system
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.time_index = 0
         self.load = pd.read_csv(config.LOAD_RESIDENTIAL_PATH, sep=";")
         self.load = self.load.dropna()

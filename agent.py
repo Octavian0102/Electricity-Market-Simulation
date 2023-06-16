@@ -1,12 +1,9 @@
-import math
-
-import pandas as pd
-
 import environment as env
 import config
 
+import pandas as pd
 import datetime as dt
-from math import isclose
+import numpy as np
 
 class Agent():
     """
@@ -48,7 +45,6 @@ class Agent():
 
         # violation counter for validation and debug purposes
         self.violations = 0
-
 
     def run(self) -> None:
         """
@@ -133,7 +129,7 @@ class Agent():
             # load balancing
             balance = pv + self.discharge[self.index_f] - self.charge[self.index_f] + \
                 self.grid_demand[self.index_f] - self.grid_supply[self.index_f] - delivered - load
-            if(not isclose(balance, 0, abs_tol = 0.000001)):
+            if(not np.isclose(balance, 0, abs_tol = 0.000001)):
                 print(f"\t{index}: {self.time}: load balance: {balance}")
                 self.violations += 1
 
@@ -150,7 +146,6 @@ class Agent():
             self.time = self.time + config.T_DELTA
 
         print(f"Constraint violations: {self.violations}")
-
 
     def greedy(self) -> None:
         """
@@ -288,7 +283,7 @@ class Agent():
         self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, surplus + discharge)
         if(CURRENT_T in ERRORS): print(f"Action: market offer at {best_market} of {surplus + battery} for {best_price} €/kWh based on high price\n")
 
-    def getMarketPrediction(self, ahead_time) -> dict(): # TODO adapt this to deliver time-sensitive market price predictions
+    def getMarketPrediction(self, ahead_time) -> dict():
         """
         Gives a price forecast for the different markets based on past market prices and the forecast time
         :param ahead_time: the forecast time
@@ -298,9 +293,9 @@ class Agent():
         index = ((dt.timedelta(hours = self.time.hour, minutes = self.time.minute) // config.T_DELTA) + ahead_time) % 96
 
         res = dict()
-        res["DA"] = self.price_dict["DA"][index] * (1 - math.sqrt(ahead_time) * config.VOLA_DA)
-        res["IA"] = self.price_dict["IA"][index] * (1 - math.sqrt(ahead_time) * config.VOLA_IA)
-        res["IC"] = self.price_dict["IC"][index] * (1 - math.sqrt(ahead_time) * config.VOLA_IC)
+        res["DA"] = self.price_dict["DA"][index] * (1 - np.sqrt(ahead_time) * config.VOLA_DA)
+        res["IA"] = self.price_dict["IA"][index] * (1 - np.sqrt(ahead_time) * config.VOLA_IA)
+        res["IC"] = self.price_dict["IC"][index] * (1 - np.sqrt(ahead_time) * config.VOLA_IC)
         #print(f"Index {index}, for {self.time}, ahead_time {ahead_time}, return {res}")
         return res
 
