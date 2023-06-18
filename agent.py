@@ -374,8 +374,6 @@ class Agent():
 
             # rebalance the battery with the aggregated surplus if the forecasted charge drops below zero
             if(self.battery_forecast[index] < 0): # this rebalancing assumes that the surplus is large enough to act as a sufficient battery recharge
-                if(self.surplus_agg[index] < - self.battery_forecast[index]):
-                    print("ERROR: insufficient surplus, undefined behavior may be imminent")
                 self.surplus_agg[index] += self.battery_forecast[index]
                 self.battery_forecast[index] = 0
 

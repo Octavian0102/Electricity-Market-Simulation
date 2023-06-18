@@ -91,24 +91,22 @@ class Household():
 
     def __init__(self) -> None:
         self.time_index = 0
+
+        # read in load data
         self.load = pd.read_csv(config.LOAD_RESIDENTIAL_PATH, sep=";")
         self.load = self.load.dropna()
-
-        # read in load data; for the beginning, the load is constant
         self.load = self.load.loc[self.load["Time"] >= config.T_START_STR]
         self.load.reset_index(drop=True, inplace=True)
 
-        self.battery_state = config.BATTERY_CHARGE_INIT
-
         # read in PV data
-        self.pv = pd.read_csv(config.PV_PATH, sep=",")
-        self.pv.rename(columns={"date": "Time", "MW": "Amount"}, inplace=True)
+        self.pv = pd.read_csv(config.PV_PATH, sep=";")
+        self.pv.rename(columns={"pv": "Amount"}, inplace=True)
         self.pv = self.pv.loc[self.pv["Time"] >= config.T_START_STR]
         self.pv.reset_index(drop=True, inplace=True)
 
         # scale PV data appropriately
         for i in range(len(self.pv)):
-            self.pv.at[i, "Amount"] = self.pv["Amount"][i] / 100 # arbitrarily chosen constant !?
+            self.pv.at[i, "Amount"] = self.pv["Amount"][i]
         
     def getPV(self) -> float:
         """

@@ -43,10 +43,16 @@ BATTERY_CHARGE_INIT = BATTERY_CHARGE_MIN # initial battery charge state [kW]
 # paths
 
 ROOT_PATH = Path(abspath(__file__)).parent
-data_path = ROOT_PATH / "data"
+DATA_PATH = ROOT_PATH / "data"
 
-PV_PATH = data_path / "pv_generation.csv"
-DAY_AHEAD_PATH = data_path / "day_ahead_prices_2022.csv"
-INTRADAY_AUCTION_PATH = data_path / "intraday_quarterly_auction_2022_prices.csv"
-INTRADAY_CONTINUOUS_PATH = data_path / "intraday_quarterly_continuous_2022_prices.csv"
-LOAD_RESIDENTIAL_PATH = data_path / "Load_Data.csv"
+WHEATHER_PATH = DATA_PATH / "wheather"
+
+TEMPERATURE_PATH = WHEATHER_PATH / "temperature.csv"
+RADIATION_PATH = WHEATHER_PATH / "radiation.csv"
+
+PV_PATH = DATA_PATH / "pv_generation.csv"
+LOAD_RESIDENTIAL_PATH = DATA_PATH / "Load_Data.csv"
+
+DAY_AHEAD_PATH = DATA_PATH / "day_ahead_prices_2022.csv"
+INTRADAY_AUCTION_PATH = DATA_PATH / "intraday_quarterly_auction_2022_prices.csv"
+INTRADAY_CONTINUOUS_PATH = DATA_PATH / "intraday_quarterly_continuous_2022_prices.csv"
