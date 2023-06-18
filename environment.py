@@ -106,7 +106,7 @@ class Household():
 
         # scale PV data appropriately
         for i in range(len(self.pv)):
-            self.pv.at[i, "Amount"] = self.pv["Amount"][i]
+            self.pv.at[i, "Amount"] = self.pv["Amount"][i] * 44000 # TODO multiply with scenario-dependent STC power
         
     def getPV(self) -> float:
         """
@@ -124,5 +124,4 @@ class Household():
         """
         
         result = self.load["Sum [kWh]"][self.time_index]
-        self.time_index += 1
         return result

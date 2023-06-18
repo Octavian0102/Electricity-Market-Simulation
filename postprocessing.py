@@ -1,4 +1,4 @@
-import agent
+import config
 import matplotlib.pyplot as plt
 
 
@@ -17,6 +17,7 @@ def post_bar(df):
     plt.ylabel("Gains in €", labelpad=10)
     plt.title("Scenario 1: Cumulated Gains")
     plt.xticks(fontsize=8)
+    plt.savefig(config.OUTPUT_PATH / "bar_chart.png")
     plt.show()
 
 
@@ -34,10 +35,14 @@ def line_chart(df):
     plt.title("Scenario 1: Cumulated Gains")
     plt.legend(title="Offered Markets", labels=columns)
     plt.xticks(rotation=45)
+    plt.savefig(config.OUTPUT_PATH / "line_chart.png")
     plt.show()
 
 
 def fancy_chart(df):
-
-
-    pass
+    plt.figure(figsize = (20, 10))
+    plt.plot(df["battery_charge"], marker = "o", markersize = 4)
+    plt.plot(df["pv"], marker = "o", markersize = 4)
+    plt.axhline(y = 0, color = "red", linestyle = "dashed")
+    plt.axhline(y = 100, color = "red", linestyle = "dashed")
+    plt.savefig(config.OUTPUT_PATH / "fancy_chart.png")

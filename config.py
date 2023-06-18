@@ -43,6 +43,7 @@ BATTERY_CHARGE_INIT = BATTERY_CHARGE_MIN # initial battery charge state [kW]
 # paths
 
 ROOT_PATH = Path(abspath(__file__)).parent
+OUTPUT_PATH = ROOT_PATH / "output"
 DATA_PATH = ROOT_PATH / "data"
 
 WHEATHER_PATH = DATA_PATH / "wheather"
