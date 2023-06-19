@@ -1,10 +1,15 @@
-#import scenario
+import scenario
 import agent
 import postprocessing as post
 
-#sc = scenario.Scenario("scenario01.json") # TODO get this from the command line arguments
+import sys
 
-ag = agent.Agent()
+filename = "scenario_test.json" # default scenario
+if(len(sys.argv) > 1): filename = sys.argv[1] + ".json" # if present, use custom scenario specified on the command lin
+
+sc = scenario.Scenario(filename)
+
+ag = agent.Agent(sc)
 ag.run()
 
 print(ag.action_log)

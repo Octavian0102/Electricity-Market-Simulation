@@ -1,4 +1,5 @@
 import environment as env
+from scenario import Scenario
 import config
 
 import pandas as pd
@@ -10,11 +11,13 @@ class Agent():
     Models the agent and contains the algorithm for taking optimized actions
     """
 
-    def __init__(self) -> None:
-        self.market = env.Market()
-        self.household = env.Household()
+    def __init__(self, sc : Scenario) -> None:
+        self.market = env.Market(sc)
+        self.household = env.Household(sc)
 
-        self.time = config.T_START
+        self.scenario = sc
+
+        self.time = self.scenario.t_start
 
         # technical housekeeping variables
         self.length_forecast = 192 # 2 * 96 to observe future pv, load and battery data up to 2 days in advance
@@ -24,7 +27,7 @@ class Agent():
         # variables of which the agent has to keep track over time and maintain a forecast for the near future
         self.pv_forecast = [0] * self.length_forecast
         self.load_forecast = [0] * self.length_forecast
-        self.battery_forecast = [config.BATTERY_CHARGE_INIT] * self.length_forecast
+        self.battery_forecast = [self.scenario.batter_charge_init] * self.length_forecast
         self.discharge = [0] * self.length_forecast
         self.charge = [0] * self.length_forecast
         self.grid_demand = [0] * self.length_forecast
@@ -51,6 +54,8 @@ class Agent():
         Runs the optimization over the given time for the given environment
         """
 
+        LAMBDA = self.scenario.price_average_coefficient
+
         gains = dict()
         gains["grid"] = 0
         gains["DA"] = 0
@@ -63,11 +68,11 @@ class Agent():
         # here, no market offer is possible
         (load, pv, battery, _, _, _, _) = self.getForecasts(0)
         if(pv - load > 0): # if there is an energy surplus, use is to charge the battery or feed it into the grid
-            if(battery + pv - load <= config.BATTERY_CHARGE_MAX): self.updateForecasts(0, pv - load, 0, 0, 0, 0)
+            if(battery + pv - load <= self.scenario.batter_charge_max): self.updateForecasts(0, pv - load, 0, 0, 0, 0)
             else: self.updateForecasts(0, 0, 0, 0, pv - load, 0)
         else: self.updateForecasts(0, 0, 0, load - pv, 0, 0) # satisfy a deficit from the grid
 
-        for index in range(config.T):
+        for index in range(self.scenario.number_of_intervals):
 
             prices = self.market.getMarketPrices()
 
@@ -86,9 +91,9 @@ class Agent():
                 i += 1
 
             # update running price average
-            self.price_dict["DA"][(index + 48) % 96] = self.price_dict["DA"][(index + 48) % 96] * config.LAMBDA + prices["DA"] * (1 - config.LAMBDA)
-            self.price_dict["IA"][(index + 48) % 96] = self.price_dict["IA"][(index + 48) % 96] * config.LAMBDA + prices["IA"] * (1 - config.LAMBDA)
-            self.price_dict["IC"][(index + 48) % 96] = self.price_dict["IC"][(index + 48) % 96] * config.LAMBDA + prices["IC"] * (1 - config.LAMBDA)
+            self.price_dict["DA"][(index + 48) % 96] = self.price_dict["DA"][(index + 48) % 96] * LAMBDA + prices["DA"] * (1 - LAMBDA)
+            self.price_dict["IA"][(index + 48) % 96] = self.price_dict["IA"][(index + 48) % 96] * LAMBDA + prices["IA"] * (1 - LAMBDA)
+            self.price_dict["IC"][(index + 48) % 96] = self.price_dict["IC"][(index + 48) % 96] * LAMBDA + prices["IC"] * (1 - LAMBDA)
 
             # determine the action to take using a greedy approach
             self.greedy()
@@ -117,12 +122,12 @@ class Agent():
 
             # battery state
             (load, pv, battery, _, _, _, _) = self.getForecasts(0)
-            if(battery < config.BATTERY_CHARGE_MIN):
+            if(battery < self.scenario.battery_charge_min):
                 self.violation_log.loc[len(self.violation_log)] = \
                     [self.time, f"{index}: battery minimum charge: {battery}"]
                 self.violations += 1
             
-            if(battery > config.BATTERY_CHARGE_MAX):
+            if(battery > self.scenario.batter_charge_max):
                 self.violation_log.loc[len(self.violation_log)] = \
                     [self.time, f"{index}: battery maximum charge: {battery}"]
                 self.violations += 1
@@ -146,8 +151,8 @@ class Agent():
                     [self.time, f"\t{index}: load balance: {balance}"]
                 self.violations += 1
 
-            costs += self.grid_demand[self.index_f] * config.GRID_PRICE_RESIDENTIAL
-            gains["grid"] += self.grid_supply[self.index_f] * config.GRID_PRICE_FEEDIN
+            costs += self.grid_demand[self.index_f] * self.scenario.grid_price_residential
+            gains["grid"] += self.grid_supply[self.index_f] * self.scenario.grid_price_feedin
 
             self.log_pd.loc[len(self.log_pd)] = [gains["DA"], gains["IA"], gains["IC"], gains["grid"],
                                                  battery, pv, load, balance, self.time]
@@ -165,11 +170,11 @@ class Agent():
         self.plan_decision(1, ["IC"]) 
 
         # if the gate closure time for the intraday auction market is reached, plan decisions for the next day (IA and IC market)
-        if(self.time.time() == config.INTRADAY_AUCTION_CLOSURE):
+        if(self.time.time() == self.scenario.intraday_auction_closure):
             for t in range(33, 33+96):
                 self.plan_decision(t, ["IA"])
         # if the gate closure time for the day-ahead market is reached, plan decisions for the next day (DA, IA and IC market)
-        if(self.time.time() == config.DAY_AHEAD_CLOSURE):
+        if(self.time.time() == self.scenario.day_ahead_closure):
             for t in range(49, 49+96):
                 self.plan_decision(t, ["DA"])
 
@@ -189,12 +194,12 @@ class Agent():
         best_market = "IC"
         # check intraday auction market
         if(self.time.date() < placement_time.date() and
-           self.time.time() <= config.INTRADAY_AUCTION_CLOSURE):
+           self.time.time() <= self.scenario.intraday_auction_closure):
             if(prices["IA"] > prices[best_market]):
                 best_market = "IA"
         # check day-ahead market
         if(self.time.date() < placement_time.date() and
-           self.time.time() <= config.DAY_AHEAD_CLOSURE):
+           self.time.time() <= self.scenario.day_ahead_closure):
             if(prices["DA"] > prices[best_market]):
                 best_market = "DA"
         
@@ -232,11 +237,11 @@ class Agent():
 
         # from here on, it is assumed that there is a surplus, so one now wants to make optimal use of this additional energy
         # first, check whether the minimum offer quantitiy for the energy market is satisfied
-        if(surplus + battery < config.MIN_OFFER_QUANTITY or surplus + min_surplus < config.MIN_OFFER_QUANTITY):
-            if(battery + surplus < config.BATTERY_CHARGE_MAX):
+        if(surplus + battery < self.scenario.min_offer_quantity or surplus + min_surplus < self.scenario.min_offer_quantity):
+            if(battery + surplus < self.scenario.batter_charge_max):
                 charge = surplus # charge the battery with the energy surplus and place no market offers
             else:
-                charge = config.BATTERY_CHARGE_MAX - battery # fully charge the battery
+                charge = self.scenario.batter_charge_max - battery # fully charge the battery
                 grid_supply = surplus - charge # feed the remaining energy into the grid
             
             if(ahead_time == 1):
@@ -244,20 +249,20 @@ class Agent():
             return
 
         # check whether the market price is lower than the grid residential price
-        if(best_price < config.GRID_PRICE_RESIDENTIAL):
+        if(best_price < self.scenario.grid_price_residential):
             # if so, use the energy to charge the battery or offer a fraction of it on the market if the battery is full
-            if(battery + surplus < config.BATTERY_CHARGE_MAX): # charge the battery if possible
+            if(battery + surplus < self.scenario.batter_charge_max): # charge the battery if possible
                 charge = surplus # charge the battery with the energy surplus and place no market offers
                 if(ahead_time == 1): self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, 0)
                 return
             
-            if(best_price < config.GRID_PRICE_FEEDIN):
+            if(best_price < self.scenario.grid_price_feedin):
                 grid_supply = surplus
                 if(ahead_time == 1): self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, 0)
                 return
 
             # offer the minimum amount of energy on the market otherwise
-            discharge = max(config.MIN_OFFER_QUANTITY - surplus, 0) # discharge the battery to satisfy the minimum offer quantity
+            discharge = max(self.scenario.min_offer_quantity - surplus, 0) # discharge the battery to satisfy the minimum offer quantity
             self.placeOffer(best_market, placement_time, surplus + discharge, best_price)
             self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, surplus + discharge)
             return
@@ -277,9 +282,9 @@ class Agent():
         index = ((dt.timedelta(hours = self.time.hour, minutes = self.time.minute) // config.T_DELTA) + ahead_time) % 96
 
         res = dict()
-        res["DA"] = self.price_dict["DA"][index] * (1 - np.sqrt(ahead_time) * config.VOLA_DA)
-        res["IA"] = self.price_dict["IA"][index] * (1 - np.sqrt(ahead_time) * config.VOLA_IA)
-        res["IC"] = self.price_dict["IC"][index] * (1 - np.sqrt(ahead_time) * config.VOLA_IC)
+        res["DA"] = self.price_dict["DA"][index] * (1 - np.sqrt(ahead_time) * self.scenario.vola_da)
+        res["IA"] = self.price_dict["IA"][index] * (1 - np.sqrt(ahead_time) * self.scenario.vola_ia)
+        res["IC"] = self.price_dict["IC"][index] * (1 - np.sqrt(ahead_time) * self.scenario.vola_ic)
         return res
 
     def getForecasts(self, ahead_time) -> tuple():

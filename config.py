@@ -2,51 +2,11 @@ from os.path import abspath
 from pathlib import Path
 import datetime as dt
 
-# This config variable preset represents a default setting for testing purposes
-# To run the simulation with a custom scenario, use a JSON scenario config file
+# This config file contains scenario-independent variables and path specifications
 
-# --- TIME VARIABLES ---
-
-# simulation time
-T_START_STR = "2022-07-01 12:00"
-T_END_STR = "2022-07-04 12:00"
-
-T_START = dt.datetime.strptime(T_START_STR, "%Y-%m-%d %H:%M")
-T_END = dt.datetime.strptime(T_END_STR, "%Y-%m-%d %H:%M")
-
-# number of quarter hours between start and end time
-T = int(((T_END - T_START).total_seconds() / 60) / 15) + 1
+# --- GLOBAL VARIABLES ---
 
 T_DELTA = dt.timedelta(minutes=15) # simulation timestep size
-
-# --- MARKET MODEL VARIABLES
-
-# gate closure times
-DAY_AHEAD_CLOSURE_STR = "12:00"
-INTRADAY_AUCTION_CLOSURE_STR = "16:00"
-
-DAY_AHEAD_CLOSURE = dt.datetime.strptime(DAY_AHEAD_CLOSURE_STR, "%H:%M").time()
-INTRADAY_AUCTION_CLOSURE = dt.datetime.strptime(INTRADAY_AUCTION_CLOSURE_STR, "%H:%M").time()
-
-MIN_OFFER_QUANTITY = 100 # minimum quantity to offer on a market [kWh]
-
-LAMBDA = 0 # non-negative, LAMBDA = 0 leads to prices not being averaged over time
-VOLA_DA = 0
-VOLA_IA = 0
-VOLA_IC = 0
-
-# grid constants
-GRID_PRICE_RESIDENTIAL = 0.3 # grid residential price [€/kWh]
-GRID_PRICE_FEEDIN = 0.07 # grid feedin price [€/kWh]
-
-# --- HOUSEHOLD VARIABLES ---
-
-# battery constants
-BATTERY_CHARGE_MIN = 0 # minimum battery charge state [kW]
-BATTERY_CHARGE_MAX = 100 # maximum battery charge state [kW]
-BATTERY_CHARGE_INIT = BATTERY_CHARGE_MIN # initial battery charge state [kW]
-
-PV_POWER_STC = 44 # quoted pv power under STC (standard test conditions) [W]
 
 # --- PATHS ---
 

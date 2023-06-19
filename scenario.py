@@ -16,26 +16,26 @@ class Scenario():
         sc = json.load(open(full_path))
 
         # update the config variables
-        self.t_start_str = sc["t-start"]
-        self.t_end_str = sc["t-end"]
+        self.t_start_str = sc["t-start"] # simulation start time [string]
+        self.t_end_str = sc["t-end"] # simulation end time [string]
 
-        self.day_ahead_closure_str = sc["day-ahead-closure"]
-        self.intraday_auction_closure_str = sc["intraday-auction-closure"]
-        self.min_offer_quantity = sc["min-offer-quantity"]
+        self.day_ahead_closure_str = sc["day-ahead-closure"] # day-ahead market gate closure time [string]
+        self.intraday_auction_closure_str = sc["intraday-auction-closure"] # intraday auction gate closure time [string]
+        self.min_offer_quantity = sc["min-offer-quantity"] # minimum market offer quantity [kWh]
 
-        self.price_average_coefficient = sc["price-average-coefficient"]
-        self.vola_da = sc["vola_da"]
-        self.vola_ia = sc["vola_ia"]
-        self.vola_ic = sc["vola_ic"]
+        self.price_average_coefficient = sc["price-average-coefficient"] # coefficient for price average calculation, non-negative [1]
+        self.vola_da = sc["vola_da"] # day-ahead market volatility [1]
+        self.vola_ia = sc["vola_ia"] # intraday auction market volatility [1]
+        self.vola_ic = sc["vola_ic"] # intraday continuous market volatility [1]
 
-        self.grid_price_residential = sc["grid-price-residential"]
-        self.grid_price_feedin = sc["grid-price-feedin"]
+        self.grid_price_residential = sc["grid-price-residential"] # residential grid price [€/kWh]
+        self.grid_price_feedin = sc["grid-price-feedin"] # feedin grid price [€/kWh]
 
-        self.battery_charge_min = sc["battery-charge-min"]
-        self.batter_charge_max = sc["battery-charge-max"]
-        self.batter_charge_init = sc["battery-charge-init"]
+        self.battery_charge_min = sc["battery-charge-min"] # minimum battery charge state [kW]
+        self.batter_charge_max = sc["battery-charge-max"] # maximum battery charge state [kW]
+        self.batter_charge_init = sc["battery-charge-init"] # initial battery charge state [kW]
 
-        self.pv_power_stc = sc["pv-power-stc"]
+        self.pv_power_stc = sc["pv-power-stc"] # quoted pv power under STC (standard test conditions) [kW]
 
         # compute derived scenario variables
         self.t_start = dt.datetime.strptime(self.t_start_str, "%Y-%m-%d %H:%M")
