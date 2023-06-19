@@ -1,0 +1,22 @@
+{
+    "t-start": "2022-06-01 12:00",
+    "t-end": "2022-07-04 12:00",
+
+    "day-ahead-closure": "12:00",
+    "intraday-auction-closure": "16:00",
+    "min-offer-quantity": 100,
+
+    "price-average-coefficient": 0,
+    "vola_da": 0,
+    "vola_ia": 0,
+    "vola_ic": 0,
+
+    "grid-price-residential": 0.3,
+    "grid-price-feedin": 0.07,
+
+    "battery-charge-min": 0,
+    "battery-charge-max": 100,
+    "battery-charge-init": 0,
+
+    "pv-power-stc": 44
+}

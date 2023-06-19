@@ -1,5 +1,8 @@
+#import scenario
 import agent
 import postprocessing as post
+
+#sc = scenario.Scenario("scenario01.json") # TODO get this from the command line arguments
 
 ag = agent.Agent()
 ag.run()

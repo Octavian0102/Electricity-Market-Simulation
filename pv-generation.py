@@ -44,7 +44,8 @@ def computePVData():
 
         t1 = float(temp + (NOCT - 20)*(rad/800))  # C     Temperature of solar panel
 
-        df_pv.at[i * 4, "pv"] = float((rad * (1-LAMB*(t1-T2)))/(G*1000)) # kWh!
+        # in the simulation, this value is multiplied with the STC power to obtain the pv generation in kWh
+        df_pv.at[i * 4, "pv"] = float(rad * (1 - LAMB * (t1 - T2)) / G) # h
 
         cur_hour = dt.datetime.strptime(str(df_t["Time"][i]), "%Y-%m-%d %H:%M:%S")
         df_pv.at[i * 4, "Time"] = cur_hour
