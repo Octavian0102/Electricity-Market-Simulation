@@ -267,7 +267,7 @@ class Agent():
             self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, surplus + discharge)
             return
 
-        # if none of the above restrictions failed, place a full offer on the market # TODO check for min_surplus
+        # if none of the above restrictions failed, place a full offer on the market
         discharge = min(battery, min_surplus) # if yes, discharge the battery as much as possible to offer this energy on the market
         self.placeOffer(best_market, placement_time, surplus + discharge, best_price) # construct the market offer
         self.updateForecasts(ahead_time, charge, discharge, grid_demand, grid_supply, surplus + discharge)
