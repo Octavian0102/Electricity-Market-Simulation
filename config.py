@@ -30,4 +30,4 @@ INTRADAY_CONTINUOUS_PATH = DATA_PATH / "intraday_quarterly_continuous_2022_price
 
 # household data paths
 PV_PATH = DATA_PATH / "pv_generation.csv"
-LOAD_RESIDENTIAL_PATH = DATA_PATH / "Load_Data.csv"
+LOAD_RESIDENTIAL_PATH = DATA_PATH / "load_data.csv"

@@ -1,6 +1,6 @@
 {
-    "t-start": "2022-07-01 12:00",
-    "t-end": "2022-07-04 12:00",
+    "t-start": "2022-01-01 00:00",
+    "t-end": "2022-12-24 00:00",
 
     "day-ahead-closure": "12:00",
     "intraday-auction-closure": "16:00",

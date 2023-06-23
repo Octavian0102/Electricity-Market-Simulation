@@ -99,7 +99,6 @@ class Household():
 
         # read in load data
         self.load = pd.read_csv(config.LOAD_RESIDENTIAL_PATH, sep=";")
-        self.load = self.load.dropna()
         self.load = self.load.loc[self.load["Time"] >= self.scenario.t_start_str]
         self.load.reset_index(drop=True, inplace=True)
 

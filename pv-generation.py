@@ -83,7 +83,7 @@ def computePVData():
     pv_after = 0.25 * sum(df_pv["pv"])
     print(f"overall pv generation: {pv_before}")
     print(f"pv generation from interpolation: {pv_after}")
-    print(f"absolute error: {np.abs(pv_after - pv_before)} kWh")
+    print(f"absolute error: {np.abs(pv_after - pv_before)}")
     print(f"relative error: {100 * np.abs(1 - pv_after / pv_before)} %")
 
     plt.figure(figsize = (20, 10))

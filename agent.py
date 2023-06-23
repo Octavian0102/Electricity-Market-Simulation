@@ -393,3 +393,5 @@ class Agent():
         valid = self.market.place_offer(c) # place offer and observe its validity
         if(not valid):
             self.violations += 1
+            self.violation_log.loc[len(self.violation_log)] = \
+                [self.time, f"invalid market offer: market: {market}, delivery time: {del_time}, quantity: {quantity}, price: {bid_price}"]
