@@ -33,6 +33,7 @@ class Market():
         # transform prices to [€/kWh]
         for i in range(len(self.prices_DA)):
             self.prices_DA.at[i, "Price"] = self.prices_DA["Price"][i] / 1000
+        for i in range(len(self.prices_IA)):
             self.prices_IA.at[i, "Price"] = self.prices_IA["Price"][i] / 1000
             self.prices_IC.at[i, "Price"] = self.prices_IC["Price"][i] / 1000
 

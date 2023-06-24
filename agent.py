@@ -42,7 +42,7 @@ class Agent():
         self.price_dict["IC"] = [0] * 96
 
         # logging dataframes
-        self.log_pd = pd.DataFrame(columns=["offer_DA", "offer_IA", "offer_IC", "grid_feedin", "battery_charge", "pv", "load", "balance", "Time"])
+        self.log_pd = pd.DataFrame(columns=["offer_DA", "offer_IA", "offer_IC", "grid_feedin", "costs", "battery_charge", "pv", "load", "balance", "Time"])
         self.action_log = pd.DataFrame(columns=["Time", "Market", "Price", "Quantity"])
         self.violation_log = pd.DataFrame(columns=["Time", "Text"])
 
@@ -154,7 +154,7 @@ class Agent():
             costs += self.grid_demand[self.index_f] * self.scenario.grid_price_residential
             gains["grid"] += self.grid_supply[self.index_f] * self.scenario.grid_price_feedin
 
-            self.log_pd.loc[len(self.log_pd)] = [gains["DA"], gains["IA"], gains["IC"], gains["grid"],
+            self.log_pd.loc[len(self.log_pd)] = [gains["DA"], gains["IA"], gains["IC"], gains["grid"], costs,
                                                  battery, pv, load, balance, self.time]
             
             self.updateHousekeeping()
