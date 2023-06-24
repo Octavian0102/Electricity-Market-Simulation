@@ -15,7 +15,7 @@ ag.run()
 print(ag.action_log)
 print(ag.log_pd)
 
-post.line_chart(ag.log_pd) # TODO fix error
+post.line_chart(ag.log_pd)
 post.battery_chart(ag.log_pd)
 post.bar_chart(ag.log_pd)
 post.demand_line1(ag.log_pd)
