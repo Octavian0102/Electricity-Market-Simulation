@@ -100,8 +100,13 @@ class Household():
 
         # read in load data
         self.load = pd.read_csv(config.LOAD_RESIDENTIAL_PATH, sep=";")
+        self.load.rename(columns={"Sum [kWh]": "Load"}, inplace=True)
         self.load = self.load.loc[self.load["Time"] >= self.scenario.t_start_str]
         self.load.reset_index(drop=True, inplace=True)
+
+        # scale load data
+        for i in range(len(self.load)):
+            self.load.at[i, "Load"] = self.load["Load"][i] * self.scenario.load_multiplier
 
         # read in PV data
         self.pv = pd.read_csv(config.PV_PATH, sep=";")
@@ -109,7 +114,7 @@ class Household():
         self.pv = self.pv.loc[self.pv["Time"] >= self.scenario.t_start_str]
         self.pv.reset_index(drop=True, inplace=True)
 
-        # scale PV data appropriately
+        # scale PV data
         for i in range(len(self.pv)):
             self.pv.at[i, "Amount"] = self.pv["Amount"][i] * self.scenario.pv_power_stc
         
@@ -128,5 +133,5 @@ class Household():
         :return: current base load
         """
         
-        result = self.load["Sum [kWh]"][self.time_index]
+        result = self.load["Load"][self.time_index]
         return result

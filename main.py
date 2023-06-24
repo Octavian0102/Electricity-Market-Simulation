@@ -4,10 +4,14 @@ import postprocessing as post
 
 import sys
 
-filename = "scenario_1.json" # default scenario
-if(len(sys.argv) > 1): filename = sys.argv[1] + ".json" # if present, use custom scenario specified on the command lin
+filename = "scenario_test.json" # default scenario
+if(len(sys.argv) > 1): filename = sys.argv[1] + ".json" # if present, use custom scenario specified on the command line
+
+print(f"Running scenario specified in {filename}...")
 
 sc = scenario.Scenario(filename)
+
+print(f"Load multiplier: {sc.load_multiplier}")
 
 ag = agent.Agent(sc)
 ag.run()

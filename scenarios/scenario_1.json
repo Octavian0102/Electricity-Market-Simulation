@@ -19,5 +19,6 @@
 
     "battery-charge-init": 0,
 
-    "pv-power-stc": 6
+    "pv-power-stc": 6,
+    "load-multiplier": 1
 }

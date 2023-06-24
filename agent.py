@@ -298,8 +298,8 @@ class Agent():
         # check if the data was already loaded for ahead_time
         while(self.valid_f <= ahead_time):
             # get the pv and load data
-            pv = self.household.getPV()
             load = self.household.getLoad()
+            pv = self.household.getPV()
             self.pv_forecast[(self.index_f + self.valid_f) % self.length_forecast] = pv
             self.load_forecast[(self.index_f + self.valid_f) % self.length_forecast] = load
 

@@ -1,9 +1,9 @@
 {
-    "t-start": "2022-01-01 00:00",
-    "t-end": "2022-12-24 00:00",
+    "t-start": "2022-07-01 00:00",
+    "t-end": "2022-07-08 00:00",
 
     "day-ahead-closure": "12:00",
-    "intraday-auction-closure": "16:00",
+    "intraday-auction-closure": "15:00",
     "min-offer-quantity": 100,
 
     "price-average-coefficient": 0,
@@ -16,7 +16,9 @@
 
     "battery-charge-min": 0,
     "battery-charge-max": 100,
+    
     "battery-charge-init": 0,
 
-    "pv-power-stc": 44
+    "pv-power-stc": 44,
+    "load-multiplier": 1
 }

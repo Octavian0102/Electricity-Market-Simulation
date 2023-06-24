@@ -36,6 +36,7 @@ class Scenario():
         self.batter_charge_init = sc["battery-charge-init"] # initial battery charge state [kW]
 
         self.pv_power_stc = sc["pv-power-stc"] # quoted pv power under STC (standard test conditions) [kW]
+        self.load_multiplier = sc["load-multiplier"] # multiplier for the load data (1 = one household)
 
         # compute derived scenario variables
         self.t_start = dt.datetime.strptime(self.t_start_str, "%Y-%m-%d %H:%M")
