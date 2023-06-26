@@ -7,8 +7,8 @@
     "min-offer-quantity": 100,
 
     "price-average-coefficient": 0,
-    "vola_da": 0,
-    "vola_ia": 0,
+    "vola_da": 0.4,
+    "vola_ia": 0.2,
     "vola_ic": 0,
 
     "grid-price-residential": 0.3,

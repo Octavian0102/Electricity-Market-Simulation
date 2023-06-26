@@ -11,8 +11,6 @@ print(f"Running scenario specified in {filename}...")
 
 sc = scenario.Scenario(filename)
 
-print(f"Load multiplier: {sc.load_multiplier}")
-
 ag = agent.Agent(sc)
 ag.run()
 
@@ -21,7 +19,7 @@ print(ag.log_pd)
 
 post.line_chart(ag.log_pd)
 post.battery_chart(ag.log_pd)
-post.bar_chart(ag.log_pd)
+#post.bar_chart(ag.log_pd)
 post.demand_line1(ag.log_pd)
 post.price_line1(ag.log_pd)
 

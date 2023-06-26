@@ -1,6 +1,5 @@
-import agent
 import matplotlib.pyplot as plt
-import numpy as np
+import config
 
 
 def bar_chart(df):
@@ -19,6 +18,10 @@ def bar_chart(df):
     plt.ylabel("Gains in €", labelpad=10)
     plt.title("Scenario 1: Cumulated Gains")
     plt.xticks(fontsize=8)
+
+    path = config.OUTPUT_PATH / "bar_chart.png"
+    plt.savefig(path)
+
     plt.show()
 
 
@@ -38,6 +41,10 @@ def line_chart(df):
     plt.title("Scenario 1: Cumulated Gains")
     plt.legend(title="Offered Markets", labels=y_values)
     plt.xticks(rotation=45)
+
+    path = config.OUTPUT_PATH / "line_chart.png"
+    plt.savefig(path)
+
     plt.show()
 
 
@@ -57,6 +64,10 @@ def fancy_chart(df):
     ax.set_ylabel('Gains in €')
     ax.set_title('Scenario 1: Placed offers')
     plt.legend(title="Offered Markets", labels=["DA", "IA", "IC"])
+
+    path = config.OUTPUT_PATH / "fancy_chart.png"
+    plt.savefig(path)
+
     plt.show()
 
 
@@ -74,6 +85,10 @@ def battery_chart(df):
     plt.title('Battery Charge State')
     plt.xticks(rotation=45)
     # Show the plot
+
+    path = config.OUTPUT_PATH / "battery_chart.png"
+    plt.savefig(path)
+
     plt.show()
 
 
@@ -100,6 +115,9 @@ def show_charge(df):
     plt.ylabel('Battery Charge')
     plt.title('Battery Charge State with Moving Average (Window Size: {})'.format(window_size))
     plt.xticks(rotation=45)
+
+    path = config.OUTPUT_PATH / "charge.png"
+    plt.savefig(path)
 
     # Show the plot
     plt.show()
@@ -136,7 +154,8 @@ def demand_line(df):
     plt.subplots_adjust(bottom=0.3)
 
     # Save the graph as a high-resolution image
-    plt.savefig("Scenario1.png", dpi=1200)
+    path = config.OUTPUT_PATH / "demand_line.png"
+    plt.savefig(path, dpi=1200)
 
     plt.show()
 
@@ -163,7 +182,8 @@ def demand_line1(df):
     plt.subplots_adjust(bottom=0.3)
 
     # Save the graph as a high-resolution image
-    plt.savefig("Residential_balance.png", dpi=1200)  # Adjust the file name and dpi value as needed
+    path = config.OUTPUT_PATH / "demand_line1.png"
+    plt.savefig(path, dpi=1200)  # Adjust the file name and dpi value as needed
 
     plt.show()
 
@@ -181,6 +201,9 @@ def price_line1(df):
     ax.tick_params(axis='x', rotation=45)
     plt.subplots_adjust(bottom=0.3)
     plt.legend(labels=y_values)
+
     # Save the graph as a high-resolution image
-    plt.savefig("Residential_gains.png", dpi=1200)  # Adjust the file name and dpi value as needed
+    path = config.OUTPUT_PATH / "price_line1.png"
+    plt.savefig(path, dpi=1200)  # Adjust the file name and dpi value as needed
+
     plt.show()
