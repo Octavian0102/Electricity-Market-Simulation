@@ -9,7 +9,7 @@
     "price-average-coefficient": 0,
     "vola_da": 0,
     "vola_ia": 0,
-    "vola_ic": 0.4,
+    "vola_ic": 0,
 
     "grid-price-residential": 0.3,
     "grid-price-feedin": 0.07,
