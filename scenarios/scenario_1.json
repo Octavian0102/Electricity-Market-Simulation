@@ -7,8 +7,8 @@
     "min-offer-quantity": 100,
 
     "price-average-coefficient": 0,
-    "vola_da": 0.05,
-    "vola_ia": 0.02,
+    "vola_da": 0,
+    "vola_ia": 0,
     "vola_ic": 0,
 
     "grid-price-residential": 0.3,
@@ -19,6 +19,6 @@
 
     "battery-charge-init": 0,
 
-    "pv-power-stc": 44,
+    "pv-power-stc": 45,
     "load-multiplier": 5
 }

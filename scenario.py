@@ -32,8 +32,8 @@ class Scenario():
         self.grid_price_feedin = sc["grid-price-feedin"] # feedin grid price [€/kWh]
 
         self.battery_charge_min = sc["battery-charge-min"] # minimum battery charge state [kW]
-        self.batter_charge_max = sc["battery-charge-max"] # maximum battery charge state [kW]
-        self.batter_charge_init = sc["battery-charge-init"] # initial battery charge state [kW]
+        self.battery_charge_max = sc["battery-charge-max"] # maximum battery charge state [kW]
+        self.battery_charge_init = sc["battery-charge-init"] # initial battery charge state [kW]
 
         self.pv_power_stc = sc["pv-power-stc"] # quoted pv power under STC (standard test conditions) [kW]
         self.load_multiplier = sc["load-multiplier"] # multiplier for the load data (1 = one household)
