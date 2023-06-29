@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import config
+import scenario
 
 
-def bar_chart(df):
+def bar_chart(df, sc : scenario.Scenario):
     last_row = df.iloc[-1]
     # Extract the values for the desired columns
     offer_DA = last_row["offer_DA"]
@@ -19,13 +20,13 @@ def bar_chart(df):
     plt.title("Scenario 1: Cumulated Gains")
     plt.xticks(fontsize=8)
 
-    path = config.OUTPUT_PATH / "bar_chart.png"
+    path = config.OUTPUT_PATH / (sc.name + "_bar_chart.png")
     plt.savefig(path)
 
     plt.show()
 
 
-def line_chart(df):
+def line_chart(df, sc : scenario.Scenario):
     columns = ["offer_DA", "offer_IA", "offer_IC", "grid_feedin"]
     y_values = df[columns]
     y_values = y_values.rename(
@@ -42,13 +43,13 @@ def line_chart(df):
     plt.legend(title="Offered Markets", labels=y_values)
     plt.xticks(rotation=45)
 
-    path = config.OUTPUT_PATH / "line_chart.png"
+    path = config.OUTPUT_PATH / (sc.name + "_line_chart.png")
     plt.savefig(path)
 
     plt.show()
 
 
-def fancy_chart(df):
+def fancy_chart(df, sc : scenario.Scenario):
     df["Offer"] = df["Quantity"] * df["Price"]
     # Plotting
     fig, ax = plt.subplots(figsize=(10, 4))  # Set the figure size as 10 inches wide and 4 inches tall
@@ -65,13 +66,13 @@ def fancy_chart(df):
     ax.set_title('Scenario 1: Placed offers')
     plt.legend(title="Offered Markets", labels=["DA", "IA", "IC"])
 
-    path = config.OUTPUT_PATH / "fancy_chart.png"
+    path = config.OUTPUT_PATH / (sc.name + "_fancy_chart.png")
     plt.savefig(path)
 
     plt.show()
 
 
-def battery_chart(df):
+def battery_chart(df, sc : scenario.Scenario):
     battery_charge_data = df['battery_charge'].tolist()
     time_data = df['Time'].tolist()
 
@@ -86,13 +87,13 @@ def battery_chart(df):
     plt.xticks(rotation=45)
     # Show the plot
 
-    path = config.OUTPUT_PATH / "battery_chart.png"
+    path = config.OUTPUT_PATH / (sc.name + "_battery_chart.png")
     plt.savefig(path)
 
     plt.show()
 
 
-def show_charge(df):
+def show_charge(df, sc : scenario.Scenario):
     df['charge_update'] = df['battery_charge'].diff()
     df['charge_update'].fillna(0, inplace=True)
     # Create a new column 'color' based on the sign of 'charge_update'
@@ -116,14 +117,14 @@ def show_charge(df):
     plt.title('Battery Charge State with Moving Average (Window Size: {})'.format(window_size))
     plt.xticks(rotation=45)
 
-    path = config.OUTPUT_PATH / "charge.png"
+    path = config.OUTPUT_PATH / (sc.name + "_charge.png")
     plt.savefig(path)
 
     # Show the plot
     plt.show()
 
 
-def demand_line(df):
+def demand_line(df, sc : scenario.Scenario):
     columns = ["pv", "load", "battery_charge"]
     y_values = df[columns]
     x_values = df["Time"]
@@ -154,13 +155,13 @@ def demand_line(df):
     plt.subplots_adjust(bottom=0.3)
 
     # Save the graph as a high-resolution image
-    path = config.OUTPUT_PATH / "demand_line.png"
+    path = config.OUTPUT_PATH / (sc.name + "_demand_line.png")
     plt.savefig(path, dpi=1200)
 
     plt.show()
 
 
-def demand_line1(df):
+def demand_line1(df, sc : scenario.Scenario):
     columns = ["pv", "load"]
     y_values = df[columns]
     x_values = df["Time"]
@@ -182,13 +183,13 @@ def demand_line1(df):
     plt.subplots_adjust(bottom=0.3)
 
     # Save the graph as a high-resolution image
-    path = config.OUTPUT_PATH / "demand_line1.png"
+    path = config.OUTPUT_PATH / (sc.name + "_demand_line1.png")
     plt.savefig(path, dpi=1200)  # Adjust the file name and dpi value as needed
 
     plt.show()
 
 
-def price_line1(df):
+def price_line1(df, sc : scenario.Scenario):
     columns = ["costs", "grid_feedin", "offer_DA", "offer_IA", "offer_IC"]
     y_values = df[columns]
     x_values = df["Time"]
@@ -203,7 +204,7 @@ def price_line1(df):
     plt.legend(labels=y_values)
 
     # Save the graph as a high-resolution image
-    path = config.OUTPUT_PATH / "price_line1.png"
+    path = config.OUTPUT_PATH / (sc.name + "_price_line1.png")
     plt.savefig(path, dpi=1200)  # Adjust the file name and dpi value as needed
 
     plt.show()

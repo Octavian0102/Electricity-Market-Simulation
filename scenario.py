@@ -11,8 +11,10 @@ class Scenario():
         :param file: the file name for the JSON config file
         """
 
+        self.name = file # name of the scenario [string]
+
         # read in the JSON file
-        full_path = config.SCENARIO_PATH / file
+        full_path = config.SCENARIO_PATH / (self.name + ".json")
         sc = json.load(open(full_path))
 
         # update the config variables
