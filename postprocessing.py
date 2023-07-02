@@ -19,9 +19,13 @@ def bar_chart(df, sc : scenario.Scenario):
     plt.ylabel("Gains in €", labelpad=10)
     plt.title("Scenario 1: Cumulated Gains")
     plt.xticks(fontsize=8)
-
-    path = config.OUTPUT_PATH / (sc.name + "_bar_chart.png")
-    plt.savefig(path)
+    print(f"cumulated gains for IC: {offer_IC}")
+    print(f"cumulated gains for IA: {offer_IA}")
+    print(f"cumulated gains for DA: {offer_DA}")
+    print(f"cumulated gains for Grid: {grid_supply}")
+    print(f"cumulated gains for whole scenario: {offer_IC+offer_IA+offer_DA+grid_supply-grid_demand}")
+    # path = config.OUTPUT_PATH / (sc.name + "_bar_chart.png")
+    # plt.savefig(path)
 
     plt.show()
 
@@ -43,8 +47,8 @@ def line_chart(df, sc : scenario.Scenario):
     plt.legend(title="Offered Markets", labels=y_values)
     plt.xticks(rotation=45)
 
-    path = config.OUTPUT_PATH / (sc.name + "_line_chart.png")
-    plt.savefig(path)
+    # path = config.OUTPUT_PATH / (sc.name + "_line_chart.png")
+    # plt.savefig(path)
 
     plt.show()
 
@@ -53,8 +57,7 @@ def fancy_chart(df, sc : scenario.Scenario):
     df["Offer"] = df["Quantity"] * df["Price"]
     # Plotting
     fig, ax = plt.subplots(figsize=(10, 4))  # Set the figure size as 10 inches wide and 4 inches tall
-    colors = {'DA': 'steelblue', 'IA': 'lightsteelblue', 'IC': 'lightslategray'}
-
+    colors = {'DA':  "steelblue", 'IA': "teal", 'IC': "purple"}
     # Plotting bars with different colors based on the 'Market' column
     for i, row in df.iterrows():
         market = row['Market']
@@ -64,10 +67,13 @@ def fancy_chart(df, sc : scenario.Scenario):
     ax.set_xlabel('Time')
     ax.set_ylabel('Gains in €')
     ax.set_title('Scenario 1: Placed offers')
-    plt.legend(title="Offered Markets", labels=["DA", "IA", "IC"])
+    ax.spines['top'].set_visible(False)  # Remove the top border
+    ax.spines['right'].set_visible(False)  # Remove the right border
+    ax.spines['bottom'].set_visible(False)  # Remove the bottom border
+    ax.spines['left'].set_visible(False)  # Remove the left border
 
-    path = config.OUTPUT_PATH / (sc.name + "_fancy_chart.png")
-    plt.savefig(path)
+    # path = config.OUTPUT_PATH / (sc.name + "_fancy_chart.png")
+    # plt.savefig(path)
 
     plt.show()
 
@@ -76,20 +82,26 @@ def battery_chart(df, sc : scenario.Scenario):
     battery_charge_data = df['battery_charge'].tolist()
     time_data = df['Time'].tolist()
 
-    plt.subplots(figsize=(12, 4))  # Set the figure size as 10 inches wide and 4 inches tall
+    fig, ax = plt.subplots(figsize=(12, 4))
     # Plot the line chart
-    plt.plot(time_data, battery_charge_data, linestyle='-', color='b', linewidth=0.2)
-    plt.subplots_adjust(bottom=0.4)  # Adjust the bottom parameter to decrease the height
+    ax.plot(time_data, battery_charge_data, linestyle='-', color='b', linewidth=0.2)
+
+    # Remove top and right spines
+    ax.spines['top'].set_visible(False)  # Remove the top border
+    ax.spines['right'].set_visible(False)  # Remove the right border
+    ax.spines['bottom'].set_visible(False)  # Remove the bottom border
+    ax.spines['left'].set_visible(False)  # Remove the left border
+
+    # Adjust the bottom parameter to decrease the height
+    plt.subplots_adjust(bottom=0.4)
+
     # Add labels and title to the plot
     plt.xlabel('Time')
     plt.ylabel('Battery Charge')
     plt.title('Battery Charge State')
     plt.xticks(rotation=45)
+
     # Show the plot
-
-    path = config.OUTPUT_PATH / (sc.name + "_battery_chart.png")
-    plt.savefig(path)
-
     plt.show()
 
 
@@ -117,8 +129,8 @@ def show_charge(df, sc : scenario.Scenario):
     plt.title('Battery Charge State with Moving Average (Window Size: {})'.format(window_size))
     plt.xticks(rotation=45)
 
-    path = config.OUTPUT_PATH / (sc.name + "_charge.png")
-    plt.savefig(path)
+    # path = config.OUTPUT_PATH / (sc.name + "_charge.png")
+    # plt.savefig(path)
 
     # Show the plot
     plt.show()
@@ -155,8 +167,8 @@ def demand_line(df, sc : scenario.Scenario):
     plt.subplots_adjust(bottom=0.3)
 
     # Save the graph as a high-resolution image
-    path = config.OUTPUT_PATH / (sc.name + "_demand_line.png")
-    plt.savefig(path, dpi=1200)
+    # path = config.OUTPUT_PATH / (sc.name + "_demand_line.png")
+    # plt.savefig(path, dpi=1200)
 
     plt.show()
 
@@ -167,7 +179,7 @@ def demand_line1(df, sc : scenario.Scenario):
     x_values = df["Time"]
     colors = ["#005b96", "#00a8e8"]
 
-    fig, ax = plt.subplots(figsize=(10, 5))  # Adjust the figsize to change the width and height
+    fig, ax = plt.subplots(figsize=(12, 4))  # Adjust the figsize to change the width and height
 
     ax.fill_between(x_values, y_values.iloc[:, 0], y_values.iloc[:, 1],
                      where=(y_values.iloc[:, 1] > y_values.iloc[:, 0]),
@@ -181,10 +193,14 @@ def demand_line1(df, sc : scenario.Scenario):
     ax.set_title("Scenario 1: Residential Profil")
     ax.tick_params(axis='x', rotation=45)
     plt.subplots_adjust(bottom=0.3)
+    ax.spines['top'].set_visible(False)  # Remove the top border
+    ax.spines['right'].set_visible(False)  # Remove the right border
+    ax.spines['bottom'].set_visible(False)  # Remove the bottom border
+    ax.spines['left'].set_visible(False)  # Remove the left border
 
     # Save the graph as a high-resolution image
-    path = config.OUTPUT_PATH / (sc.name + "_demand_line1.png")
-    plt.savefig(path, dpi=1200)  # Adjust the file name and dpi value as needed
+    # path = config.OUTPUT_PATH / (sc.name + "_demand_line1.png")
+    # plt.savefig(path, dpi=1200)  # Adjust the file name and dpi value as needed
 
     plt.show()
 
@@ -193,7 +209,7 @@ def price_line1(df, sc : scenario.Scenario):
     columns = ["costs", "grid_feedin", "offer_DA", "offer_IA", "offer_IC"]
     y_values = df[columns]
     x_values = df["Time"]
-    colors = ["red", "green", "steelblue", "lightsteelblue", "lightslategray" ]
+    colors = ["red", "green", "steelblue", "teal", "purple" ]
     fig, ax = plt.subplots(figsize=(12, 5))  # Adjust the figsize to change the width and height
     for i, column in enumerate(y_values.columns):
         ax.plot(x_values, y_values[column], color=colors[i], linewidth=0.8)
@@ -202,9 +218,38 @@ def price_line1(df, sc : scenario.Scenario):
     ax.tick_params(axis='x', rotation=45)
     plt.subplots_adjust(bottom=0.3)
     plt.legend(labels=y_values)
+    ax.spines['top'].set_visible(False)  # Remove the top border
+    ax.spines['right'].set_visible(False)  # Remove the right border
+    ax.spines['bottom'].set_visible(False)  # Remove the bottom border
+    ax.spines['left'].set_visible(False)  # Remove the left border
 
     # Save the graph as a high-resolution image
-    path = config.OUTPUT_PATH / (sc.name + "_price_line1.png")
-    plt.savefig(path, dpi=1200)  # Adjust the file name and dpi value as needed
+    # path = config.OUTPUT_PATH / (sc.name + "_price_line1.png")
+    # plt.savefig(path, dpi=1200)  # Adjust the file name and dpi value as needed
 
     plt.show()
+
+
+def counter(df):
+    DA = 0
+    IA = 0
+    IC = 0
+
+    for i in df["Market"]:
+        if i == "IC":
+            IC +=1
+        elif i == "DA":
+            DA += 1
+        elif i == "IA":
+            IA += 1
+    sum_quantity_IC = df[df["Market"] == "IC"]["Quantity"].sum()
+    sum_quantity_IA = df[df["Market"] == "IA"]["Quantity"].sum()
+    sum_quantity_DA = df[df["Market"] == "DA"]["Quantity"].sum()
+    print(f"DA: {DA}")
+    print(f"IA: {IA}")
+    print(f"IC: {IC}")
+    print(f"IC_Q: {sum_quantity_IC}")
+    print(f"IA_Q: {sum_quantity_IA}")
+    print(f"DA_Q: {sum_quantity_DA}")
+    print(f"Spot Market offer: {DA+IA+IC}")
+    print(f"Grid: {33792-DA-IA-IC}")

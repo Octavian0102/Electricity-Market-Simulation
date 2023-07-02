@@ -17,11 +17,13 @@ ag.run()
 print(ag.action_log)
 print(ag.log_pd)
 
-post.line_chart(ag.log_pd, sc)
-post.battery_chart(ag.log_pd, sc)
-#post.bar_chart(ag.log_pd, sc)
-#post.demand_line1(ag.log_pd, sc)
+# post.line_chart(ag.log_pd, sc)
+# post.battery_chart(ag.log_pd, sc)
+post.bar_chart(ag.log_pd, sc)
+post.demand_line1(ag.log_pd, sc)
 post.price_line1(ag.log_pd, sc)
+post.counter(ag.action_log)
+post.fancy_chart(ag.action_log, sc)
 
 print(f"Total constraint violations: {ag.violations}")
 if(ag.violations > 0):

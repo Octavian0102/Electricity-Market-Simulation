@@ -4,9 +4,9 @@
 
     "day-ahead-closure": "12:00",
     "intraday-auction-closure": "15:00",
-    "min-offer-quantity": 100,
+    "min-offer-quantity": 5,
 
-    "price-average-coefficient": 0,
+    "price-average-coefficient": 0.0,
     "vola_da": 0,
     "vola_ia": 0,
     "vola_ic": 0,
