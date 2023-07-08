@@ -1,7 +1,6 @@
-import matplotlib.pyplot as plt
-import config
 import scenario
 
+import matplotlib.pyplot as plt
 
 def bar_chart(df, sc : scenario.Scenario):
     last_row = df.iloc[-1]
